@@ -77,6 +77,9 @@ public enum ErrorCode implements BaseCode {
     //common
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "COMMON-0000", "잘못된 요청입니다."),
 
+    //GroupError
+    GROUP_NOT_FOUND(HttpStatus.BAD_REQUEST, "GROUP-0000", "해당 ID를 가진 그룹을 찾을 수 없습니다."),
+
     //JWT error
     EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "TOKEN-0000", "AccessToken 기간 만료됨"),
     INVALID_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN-0001", "토큰이 올바르지 않습니다."),
