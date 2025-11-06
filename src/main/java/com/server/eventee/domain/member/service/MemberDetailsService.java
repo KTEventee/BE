@@ -1,0 +1,36 @@
+package com.server.eventee.domain.member.service;
+
+import com.server.eventee.domain.member.dto.MemberAuthContext;
+import com.server.eventee.domain.member.dto.MemberDetails;
+import com.server.eventee.domain.member.model.Member;
+import com.server.eventee.domain.member.repository.MemberRepository;
+import com.server.eventee.global.exception.BaseException;
+import com.server.eventee.global.exception.codes.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+
+@RequiredArgsConstructor
+@Service
+@Slf4j
+public class MemberDetailsService implements UserDetailsService {
+    private final MemberRepository memberRepository;
+
+    @Override
+    public MemberDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+
+        Member member = memberRepository.findMemberByEmail(username).orElseThrow(
+                () -> new BaseException(ErrorCode.MEMBER_NOT_FOUND));
+        log.info("loadUserByUsername : {}",member.getEmail());
+        if(member== null){
+            log.info("[loadUserByUsername] username:{}, {}", username, ErrorCode.MEMBER_NOT_FOUND);
+        }
+        MemberAuthContext ctx = MemberAuthContext.of(member);
+        log.info("ctx생성");
+        return new MemberDetails(ctx);
+    }
+}
