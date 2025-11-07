@@ -16,7 +16,7 @@ services:
   redis:
     image: redis:7.0
     container_name: eventee-redis
-    command: redis-server --requirepass testpw
+    command: redis-server
     ports:
       - "6379:6379"
     networks:
