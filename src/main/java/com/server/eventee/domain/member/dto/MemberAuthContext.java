@@ -5,18 +5,21 @@ import lombok.Builder;
 
 @Builder
 public record MemberAuthContext(
-        Long id,
-        String name,
-        String role,
-        String email,
-        String password
+    Long id,
+    String nickname,
+    String email,
+    String role,
+    String profileImageKey,
+    String socialId
 ) {
     public static MemberAuthContext of(Member member) {
         return MemberAuthContext.builder()
-                .email(member.getEmail())
-                .name(member.getMemberName())
-                .role(member.getRole().toString())
-                .id(member.getId())
-                .build();
+            .id(member.getId())
+            .nickname(member.getNickname())
+            .email(member.getEmail())
+            .role(member.getRole().name())
+            .profileImageKey(member.getProfileImageKey())
+            .socialId(member.getSocialId())
+            .build();
     }
 }
