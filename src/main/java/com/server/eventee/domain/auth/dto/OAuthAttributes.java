@@ -1,28 +1,38 @@
 package com.server.eventee.domain.auth.dto;
 
 import com.server.eventee.domain.member.model.Member;
-import com.server.eventee.domain.member.model.Role;
-
+import com.server.eventee.domain.member.model.Member.Role;
 import java.util.Map;
+import lombok.Builder;
 
+@Builder
 public record OAuthAttributes(
     Map<String, Object> attributes,
+    String sub,
     String email,
-    String sub
+    String name
 ) {
+
   public Member toEntity() {
     return Member.builder()
-        .email(email)
         .socialId(sub)
-        .role(Role.ROLE_USER)
+        .email(email)
+        .nickname(name)
+        .profileImageKey(getDefaultProfileImage())
+        .role(Role.USER)
         .build();
   }
 
   public static OAuthAttributes of(Map<String, Object> attributes) {
-    return new OAuthAttributes(
-        attributes,
-        (String) attributes.get("email"),
-        (String) attributes.get("sub")
-    );
+    return OAuthAttributes.builder()
+        .attributes(attributes)
+        .sub((String) attributes.get("sub"))
+        .email((String) attributes.get("email"))
+        .name((String) attributes.get("name"))
+        .build();
+  }
+
+  private String getDefaultProfileImage() {
+    return "profile_default.png";
   }
 }
