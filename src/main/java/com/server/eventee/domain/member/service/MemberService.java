@@ -5,5 +5,5 @@ import jakarta.validation.constraints.NotBlank;
 
 public interface MemberService {
 
-  boolean confirmNickName(Member member, String nickname);
+  String checkAndUpdateNickname(Member member, String nickname);
 }
