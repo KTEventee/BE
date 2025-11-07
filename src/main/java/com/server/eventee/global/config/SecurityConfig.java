@@ -13,7 +13,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -25,57 +24,48 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+    private final AuthenticationTokenFilter authenticationTokenFilter;
     private final SecurityContextRepositoryImpl securityContextRepository;
 
-    private final AuthenticationTokenFilter authenticationTokenFilter;
-
-
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        // 접근 권한 설정
         http
-                .cors(cors -> cors
-                        .configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests((auth) -> auth
-                                .requestMatchers(HttpMethod.OPTIONS,"/**/*").permitAll() //preflight요청 허용함.
-                                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll() //preflight요청 허용함.
-                                .requestMatchers("/v3/**",
-                                        "/swagger-ui.html",
-                                        "/swagger-ui/**",
-                                        "/swagger-resources/**",
-                                        "/api-test/**").permitAll()
-                                .anyRequest().authenticated()
-                )
-                .securityContext((securityContext) -> {
-                    securityContext
-                            .securityContextRepository(securityContextRepository.securityContextRepository())
-                            .requireExplicitSave(false);
-                })
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .formLogin(AbstractHttpConfigurer::disable)
-                .logout(LogoutConfigurer::permitAll)
-                .addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
-            
-        //todo 구글 로그인 로직 추가
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
+                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+                .requestMatchers(
+                    "/v3/**", "/swagger-ui.html", "/swagger-ui/**",
+                    "/swagger-resources/**", "/api-test/**",
+                    "/api/v1/auth/**"
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
+            .securityContext(context ->
+                context.securityContextRepository(securityContextRepository.securityContextRepository())
+            )
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .formLogin(AbstractHttpConfigurer::disable)
+            .logout(LogoutConfigurer::permitAll)
+            .addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-
-    //cors추가한내용
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
         configuration.addAllowedOriginPattern("*");
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
@@ -83,8 +73,8 @@ public class SecurityConfig {
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }

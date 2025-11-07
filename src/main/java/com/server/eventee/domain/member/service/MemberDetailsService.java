@@ -7,30 +7,28 @@ import com.server.eventee.domain.member.repository.MemberRepository;
 import com.server.eventee.global.exception.BaseException;
 import com.server.eventee.global.exception.codes.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-
-@RequiredArgsConstructor
+/**
+ * Spring Security에서 인증된 사용자를 로드하기 위한 서비스.
+ * - JWT 인증 과정에서 이메일을 기반으로 MemberDetails를 생성함.
+ */
 @Service
-@Slf4j
+@RequiredArgsConstructor
 public class MemberDetailsService implements UserDetailsService {
-    private final MemberRepository memberRepository;
 
-    @Override
-    public MemberDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+  private final MemberRepository memberRepository;
 
+  @Override
+  public UserDetails loadUserByUsername(String email) {
+    Member member = memberRepository.findMemberByEmail(email)
+        .orElseThrow(() -> new BaseException(ErrorCode.MEMBER_NOT_FOUND));
 
-        Member member = memberRepository.findMemberByEmail(username).orElseThrow(
-                () -> new BaseException(ErrorCode.MEMBER_NOT_FOUND));
-        log.info("loadUserByUsername : {}",member.getEmail());
-        if(member== null){
-            log.info("[loadUserByUsername] username:{}, {}", username, ErrorCode.MEMBER_NOT_FOUND);
-        }
-        MemberAuthContext ctx = MemberAuthContext.of(member);
-        log.info("ctx생성");
-        return new MemberDetails(ctx);
-    }
+    return new MemberDetails(
+        MemberAuthContext.of(member),
+        member
+    );
+  }
 }
