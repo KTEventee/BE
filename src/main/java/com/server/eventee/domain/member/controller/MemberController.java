@@ -1,5 +1,6 @@
 package com.server.eventee.domain.member.controller;
 
+import com.server.eventee.domain.member.dto.MemberMyPageResponse;
 import com.server.eventee.domain.member.dto.MemberProfileImageDto;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.member.service.MemberService;
@@ -27,6 +28,7 @@ public class MemberController {
 
   private final MemberService memberService;
 
+  // 닉네임 중복 확인 및 변경
   @Operation(
       summary = "닉네임 중복 확인 및 변경",
       description = """
@@ -43,7 +45,7 @@ public class MemberController {
     return BaseResponse.of(SuccessCode.SUCCESS, updatedNickname);
   }
 
-  // Presigned URL (PUT) 발급
+  //Presigned URL (PUT) 발급
   @Operation(
       summary = "프로필 이미지 Presigned URL 발급 (PUT)",
       description = """
@@ -73,9 +75,7 @@ public class MemberController {
     return BaseResponse.of(SuccessCode.SUCCESS, response);
   }
 
-  /**
-   * 업로드 확정 (PUT 완료 후 호출)
-   */
+  //업로드 확정 (PUT 완료 후 호출)
   @Operation(
       summary = "프로필 이미지 업로드 확정",
       description = "PUT 업로드가 완료된 이미지를 확인하고 회원 프로필에 반영합니다."
@@ -89,9 +89,7 @@ public class MemberController {
     return BaseResponse.of(SuccessCode.SUCCESS, imageUrl);
   }
 
-  /**
-   * 프로필 이미지 삭제
-   */
+  //프로필 이미지 삭제
   @Operation(
       summary = "프로필 이미지 삭제",
       description = "S3에서 기존 프로필 이미지를 삭제하고 회원 프로필을 초기화합니다."
@@ -102,6 +100,21 @@ public class MemberController {
 
     MemberProfileImageDto.DeleteImageResponse response =
         memberService.deleteProfileImage(member);
+    return BaseResponse.of(SuccessCode.SUCCESS, response);
+  }
+
+  //마이페이지
+  @Operation(
+      summary = "마이페이지 정보 조회",
+      description = """
+        로그인한 회원의 닉네임, 프로필 이미지, 
+        참여한 이벤트 목록을 반환합니다.
+        """
+  )
+  @GetMapping("/mypage")
+  public BaseResponse<MemberMyPageResponse> getMyPageInfo(@CurrentMember Member member) {
+
+    MemberMyPageResponse response = memberService.getMyPageInfo(member);
     return BaseResponse.of(SuccessCode.SUCCESS, response);
   }
 }
