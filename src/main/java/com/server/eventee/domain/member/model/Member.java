@@ -38,12 +38,37 @@ public class Member extends BaseEntity {
     @Column(name = "nickname", nullable = false, length = 50)
     private String nickname;
 
+    /**
+     * S3 객체 key (예: profiles/1/uuid.jpg)
+     * 이미지 파일의 실제 경로(키) 저장용
+     */
     @Column(name = "profile_image_key", length = 255)
     private String profileImageKey;
 
+    /**
+     * CloudFront 또는 S3 Public URL
+     * 프론트엔드에서 실제 접근 가능한 URL
+     */
+    @Column(name = "profile_image_url", length = 512)
+    private String profileImageUrl;
+
+    /** 닉네임 변경 */
     public void updateNickname(String newNickname) {
         this.nickname = newNickname;
     }
+
+    /** 프로필 이미지 정보 변경 */
+    public void updateProfileImage(String key, String url) {
+        this.profileImageKey = key;
+        this.profileImageUrl = url;
+    }
+
+    /** 프로필 이미지 삭제 (DB에서만 제거) */
+    public void clearProfileImage() {
+        this.profileImageKey = null;
+        this.profileImageUrl = null;
+    }
+
 
     public enum Role {
         USER("USER"),
