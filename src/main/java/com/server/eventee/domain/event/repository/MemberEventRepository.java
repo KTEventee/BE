@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MemberEventRepository extends JpaRepository<MemberEvent, Long> {
@@ -16,4 +17,6 @@ public interface MemberEventRepository extends JpaRepository<MemberEvent, Long> 
   List<MemberEvent> findAllByEventAndIsDeletedFalse(Event event);
 
   boolean existsByMemberAndEventAndIsDeletedFalse(Member member, Event event);
+
+  Optional<MemberEvent> findByMemberAndEventAndIsDeletedFalse(Member member, Event event);
 }
