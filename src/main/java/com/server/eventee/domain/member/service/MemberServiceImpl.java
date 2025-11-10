@@ -1,10 +1,11 @@
 package com.server.eventee.domain.member.service;
 
-
-import com.server.eventee.domain.member.dto.MemberProfileImageDto.ConfirmUploadRequest;
-import com.server.eventee.domain.member.dto.MemberProfileImageDto.DeleteImageResponse;
-import com.server.eventee.domain.member.dto.MemberProfileImageDto.PresignedUrlResponse;
-import com.server.eventee.domain.member.dto.MemberProfileImageDto.UploadIntentRequest;
+import com.server.eventee.domain.event.model.Event;
+import com.server.eventee.domain.event.model.MemberEvent;
+import com.server.eventee.domain.event.repository.MemberEventRepository;
+import com.server.eventee.domain.member.converter.MemberConverter;
+import com.server.eventee.domain.member.dto.MemberMyPageResponse;
+import com.server.eventee.domain.member.dto.MemberProfileImageDto.*;
 import com.server.eventee.domain.member.exception.MemberHandler;
 import com.server.eventee.domain.member.exception.status.MemberErrorStatus;
 import com.server.eventee.domain.member.model.Member;
@@ -23,6 +24,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -32,8 +34,9 @@ import java.util.regex.Pattern;
 public class MemberServiceImpl implements MemberService {
 
   private final MemberRepository memberRepository;
+  private final MemberEventRepository memberEventRepository;
+  private final MemberConverter memberConverter;
 
-  // S3 의존성 (S3Config 에서 빈 등록된 객체 주입)
   private final S3Client s3;
   private final S3Presigner presigner;
   private final S3Props props;
@@ -56,8 +59,7 @@ public class MemberServiceImpl implements MemberService {
       return trimmed;
     }
 
-    boolean exists = memberRepository.existsByNickname(trimmed);
-    if (exists) {
+    if (memberRepository.existsByNickname(trimmed)) {
       throw new MemberHandler(MemberErrorStatus.MEMBER_NICKNAME_DUPLICATED);
     }
 
@@ -94,6 +96,17 @@ public class MemberServiceImpl implements MemberService {
         .build();
   }
 
+  // 마이페이지 정보 조회
+  @Override
+  @Transactional(readOnly = true)
+  public MemberMyPageResponse getMyPageInfo(Member member) {
+    List<MemberEvent> memberEvents = memberEventRepository.findAllByMemberAndIsDeletedFalse(member);
+    List<Event> joinedEvents = memberEvents.stream()
+        .map(MemberEvent::getEvent)
+        .toList();
+    return memberConverter.toResponse(member, joinedEvents);
+  }
+
   // 업로드 완료 후 DB 반영
   @Override
   @Transactional
@@ -116,13 +129,12 @@ public class MemberServiceImpl implements MemberService {
       throw new MemberHandler(MemberErrorStatus.MEMBER_IMAGE_CONTENT_TYPE_MISMATCH);
     }
 
-    // 기존 이미지 삭제
     if (StringUtils.isNotBlank(member.getProfileImageUrl())) {
       deleteIfExists(objectKeyFromUrl(member.getProfileImageUrl()));
     }
 
     String imageUrl = buildPublicUrl(request.getKey());
-    member.updateProfileImage(request.getKey(), imageUrl);;
+    member.updateProfileImage(request.getKey(), imageUrl);
     memberRepository.save(member);
 
     log.info("[프로필 이미지 확정] memberId={}, url={}", member.getId(), imageUrl);
@@ -135,9 +147,7 @@ public class MemberServiceImpl implements MemberService {
   public DeleteImageResponse deleteProfileImage(Member member) {
     String prevUrl = member.getProfileImageUrl();
     if (StringUtils.isBlank(prevUrl)) {
-      return DeleteImageResponse.builder()
-          .status("not_found")
-          .build();
+      return DeleteImageResponse.builder().status("not_found").build();
     }
 
     deleteIfExists(objectKeyFromUrl(prevUrl));
@@ -152,14 +162,12 @@ public class MemberServiceImpl implements MemberService {
         .build();
   }
 
-
   private void validateContentType(String contentType) {
     if (props.getAllowedContentTypes().stream()
         .noneMatch(allowed -> allowed.equalsIgnoreCase(contentType))) {
       throw new MemberHandler(MemberErrorStatus.MEMBER_IMAGE_INVALID_CONTENT_TYPE);
     }
   }
-
 
   private void validateLength(long len) {
     if (len <= 0 || len > props.getMaxUploadSizeBytes()) {
@@ -175,16 +183,12 @@ public class MemberServiceImpl implements MemberService {
   }
 
   private String mapExt(String contentType) {
-    switch (contentType) {
-      case "image/jpeg":
-        return ".jpg";
-      case "image/png":
-        return ".png";
-      case "image/webp":
-        return ".webp";
-      default:
-        throw new MemberHandler(MemberErrorStatus.MEMBER_IMAGE_INVALID_CONTENT_TYPE);
-    }
+    return switch (contentType) {
+      case "image/jpeg" -> ".jpg";
+      case "image/png" -> ".png";
+      case "image/webp" -> ".webp";
+      default -> throw new MemberHandler(MemberErrorStatus.MEMBER_IMAGE_INVALID_CONTENT_TYPE);
+    };
   }
 
   private void deleteIfExists(String key) {
@@ -199,14 +203,12 @@ public class MemberServiceImpl implements MemberService {
 
   private String objectKeyFromUrl(String url) {
     String s3Domain = props.getBucket() + ".s3." + props.getRegion() + ".amazonaws.com/";
-    if (url.contains(s3Domain)) {
-      return StringUtils.substringAfter(url, s3Domain);
-    }
-    return url;
+    return url.contains(s3Domain)
+        ? StringUtils.substringAfter(url, s3Domain)
+        : url;
   }
 
   private String buildPublicUrl(String key) {
     return "https://" + props.getBucket() + ".s3." + props.getRegion() + ".amazonaws.com/" + key;
   }
-
 }
