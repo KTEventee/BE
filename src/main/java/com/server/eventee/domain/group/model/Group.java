@@ -1,6 +1,6 @@
 package com.server.eventee.domain.group.model;
 
-
+import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.group.dto.GroupReqeust;
 import com.server.eventee.global.entity.BaseEntity;
 import com.server.eventee.domain.member.model.Member;
@@ -16,7 +16,7 @@ import java.util.Objects;
 @Getter
 @Entity
 @Table(name = "event_group")
-@SQLDelete(sql = "UPDATE group SET is_deleted = true, deleted_at = now() where id = ?")
+@SQLDelete(sql = "UPDATE event_group SET is_deleted = true, deleted_at = now() where group_id = ?")
 @SQLRestriction("is_deleted is FALSE")
 public class Group extends BaseEntity {
 
@@ -30,16 +30,21 @@ public class Group extends BaseEntity {
     @NotNull private int groupNo;
     @NotNull private String groupLeader;
 
-    //NOTE member,event 추가해야함
+    // member 추가
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id", nullable = false)
+    private Event event;
 
     @Builder(toBuilder = true)
     private Group(
-            Long groupId,
-            @NotNull String groupName,
-            @NotNull String groupDescription,
-            @NotNull String groupImg,
-            @NotNull int groupNo,
-            @NotNull String groupLeader
+        Long groupId,
+        @NotNull String groupName,
+        @NotNull String groupDescription,
+        @NotNull String groupImg,
+        @NotNull int groupNo,
+        @NotNull String groupLeader,
+        @NotNull Event event
     ) {
         this.groupId = groupId;
         this.groupName = groupName;
@@ -47,6 +52,7 @@ public class Group extends BaseEntity {
         this.groupImg = groupImg;
         this.groupNo = groupNo;
         this.groupLeader = groupLeader;
+        this.event = event;
     }
 
     public boolean updateLeader(GroupReqeust.GroupUpdateLeaderDto dto){
