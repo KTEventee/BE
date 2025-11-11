@@ -34,8 +34,16 @@ public class EventServiceImpl implements EventService {
     }
 
     String inviteCode = RandomStringUtils.randomAlphabetic(6).toUpperCase();
-    Event event = eventConverter.toEvent(inviteCode, request.title(), request.description(),
-        request.startAt(), request.endAt(), request.teamCount());
+
+    Event event = eventConverter.toEvent(
+        inviteCode,
+        request.title(),
+        request.description(),
+        request.password(),
+        request.startAt(),
+        request.endAt(),
+        request.teamCount()
+    );
     eventRepository.save(event);
 
     MemberEvent hostRelation = eventConverter.toHostRelation(member, event);
@@ -48,6 +56,7 @@ public class EventServiceImpl implements EventService {
 
     return eventConverter.toCreateResponse(event, member);
   }
+
 
   @Transactional
   @Override
