@@ -3,6 +3,8 @@ package com.server.eventee.domain.auth.service;
 import com.server.eventee.domain.auth.dto.GoogleTokenResponse;
 import com.server.eventee.domain.auth.dto.LoginResponse;
 import com.server.eventee.domain.auth.dto.OAuthAttributes;
+import com.server.eventee.domain.member.exception.MemberHandler;
+import com.server.eventee.domain.member.exception.status.MemberErrorStatus;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.member.repository.MemberRepository;
 import com.server.eventee.global.exception.BaseException;
@@ -40,7 +42,7 @@ public class GoogleTokenService implements OAuth2TokenService {
   private final RedisTemplate<String, String> redisTemplate;
 
   private static final String REFRESH_TOKEN_PREFIX = "REFRESH:";
-  private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 2;
+  private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 2; // 2일
 
   @Value("${spring.security.oauth2.client.registration.google.client-id}")
   private String clientId;
@@ -60,10 +62,10 @@ public class GoogleTokenService implements OAuth2TokenService {
   @Override
   public LoginResponse handleLogin(String code) {
     try {
-      // 인가 코드 URL 디코딩
+      // 인가 코드 디코딩
       String decodedCode = URLDecoder.decode(code, StandardCharsets.UTF_8);
 
-      // access token 발급 요청
+      // Access Token 요청
       GoogleTokenResponse tokenResponse = getAccessToken(decodedCode);
       String accessToken = tokenResponse.accessToken();
 
@@ -74,11 +76,11 @@ public class GoogleTokenService implements OAuth2TokenService {
       Member member = memberRepository.findBySocialId(attributes.sub())
           .orElseGet(() -> createNewMember(attributes));
 
-      // JWT 토큰 생성
+      // JWT 생성
       AccessToken newAccessToken = tokenProvider.generateAccessToken(member);
       RefreshToken newRefreshToken = tokenProvider.generateRefreshToken(member);
 
-      // Redis에 refresh token 저장
+      // Redis에 Refresh Token 저장
       redisTemplate.opsForValue().set(
           REFRESH_TOKEN_PREFIX + member.getSocialId(),
           newRefreshToken.token(),
@@ -86,8 +88,10 @@ public class GoogleTokenService implements OAuth2TokenService {
           TimeUnit.MILLISECONDS
       );
 
-      TokenResponse jwtResponse = TokenResponse.of(newAccessToken, newRefreshToken);
+      log.info("[로그인 성공] memberId={}, socialId={}, Redis key 저장 완료",
+          member.getId(), mask(member.getSocialId()));
 
+      TokenResponse jwtResponse = TokenResponse.of(newAccessToken, newRefreshToken);
       return new LoginResponse(
           member.getEmail(),
           jwtResponse.accessToken().token(),
@@ -95,19 +99,69 @@ public class GoogleTokenService implements OAuth2TokenService {
           jwtResponse.refreshToken().token()
       );
 
+    } catch (BaseException e) {
+      throw e;
     } catch (Exception e) {
-      log.error("구글 로그인 처리 중 오류 발생: {}", e.getMessage(), e);
+      log.error("[구글 로그인 실패] error={}", e.getMessage(), e);
       throw new BaseException(ErrorCode._INTERNAL_SERVER_ERROR);
     }
   }
 
+  // 로그아웃 처리 (Refresh Token 무효화)
+  @Override
+  @Transactional
+  public void logout(Member member, String refreshToken) {
+    if (refreshToken == null || refreshToken.isBlank()) {
+      log.warn("[로그아웃 실패] 쿠키에 Refresh Token 없음 - memberId={}, socialId={}",
+          member.getId(), mask(member.getSocialId()));
+      throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_REFRESH_TOKEN_MISSING);
+    }
+
+    try {
+      String redisKey = REFRESH_TOKEN_PREFIX + member.getSocialId();
+      String storedToken = redisTemplate.opsForValue().get(redisKey);
+
+      // Redis 저장 토큰 존재 여부 확인
+      if (storedToken == null) {
+        log.warn("[로그아웃 실패] Redis에 저장된 RT 없음 - memberId={}, key={}",
+            member.getId(), redisKey);
+        throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_TOKEN_NOT_FOUND_IN_REDIS);
+      }
+
+      // 요청 토큰과 Redis 토큰 불일치 시
+      if (!storedToken.equals(refreshToken)) {
+        log.warn("[로그아웃 실패] RT 불일치 - memberId={}, 요청RT={}, 저장RT={}",
+            member.getId(), mask(refreshToken), mask(storedToken));
+        throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_TOKEN_MISMATCH);
+      }
+
+      // Redis에서 RT 삭제
+      Boolean result = redisTemplate.delete(redisKey);
+      if (Boolean.FALSE.equals(result)) {
+        log.error("[로그아웃 실패] Redis 키 삭제 실패 - memberId={}, key={}", member.getId(), redisKey);
+        throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_REDIS_DELETE_FAILED);
+      }
+
+      log.info("[로그아웃 성공] memberId={}, socialId={}, key={} 삭제 완료",
+          member.getId(), mask(member.getSocialId()), redisKey);
+
+    } catch (MemberHandler e) {
+      throw e;
+    } catch (Exception e) {
+      log.error("[로그아웃 예외 발생] memberId={}, socialId={}, error={}",
+          member.getId(), mask(member.getSocialId()), e.getMessage(), e);
+      throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_UNKNOWN_ERROR);
+    }
+  }
+
+  // 신규 회원 생성
   @Transactional
   public Member createNewMember(OAuthAttributes attributes) {
     Member newMember = attributes.toEntity();
     return memberRepository.save(newMember);
   }
 
-  // 인가 코드로 구글 AT 요청
+  // 인가 코드로 구글 Access Token 요청
   @Transactional
   @Override
   public GoogleTokenResponse getAccessToken(String code) {
@@ -125,12 +179,12 @@ public class GoogleTokenService implements OAuth2TokenService {
           restTemplate.exchange(tokenUrl, HttpMethod.POST, null, GoogleTokenResponse.class);
       return response.getBody();
     } catch (Exception e) {
-      log.error("구글 액세스 토큰 요청 실패: {}", e.getMessage(), e);
+      log.error("[구글 Access Token 요청 실패] code={}, error={}", mask(code), e.getMessage(), e);
       throw new BaseException(ErrorCode.INVALID_TOKEN);
     }
   }
 
-  // 구글 AT로 사용자 정보 요청
+  // 구글 Access Token으로 사용자 정보 요청
   @Override
   @Transactional
   public OAuthAttributes getUserInfo(String accessToken) {
@@ -145,8 +199,15 @@ public class GoogleTokenService implements OAuth2TokenService {
 
       return OAuthAttributes.of(attributes);
     } catch (Exception e) {
-      log.error("구글 사용자 정보 요청 실패: {}", e.getMessage(), e);
+      log.error("[구글 사용자 정보 요청 실패] accessToken={}, error={}",
+          mask(accessToken), e.getMessage(), e);
       throw new BaseException(ErrorCode.MEMBER_NOT_FOUND);
     }
+  }
+
+  private String mask(String raw) {
+    if (raw == null) return "null";
+    int visible = Math.min(6, raw.length());
+    return raw.substring(0, visible) + "...(" + raw.length() + ")";
   }
 }
