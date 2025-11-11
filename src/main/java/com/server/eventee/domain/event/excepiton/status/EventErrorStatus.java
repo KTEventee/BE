@@ -17,6 +17,7 @@ public enum EventErrorStatus implements BaseCode {
   EVENT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "EVENT-0003", "이벤트에 접근할 권한이 없습니다."),
   EVENT_ALREADY_JOINED(HttpStatus.CONFLICT, "EVENT-0004", "이미 해당 이벤트에 참여 중입니다."),
   EVENT_TEAM_COUNT_INVALID(HttpStatus.BAD_REQUEST, "EVENT-0005", "팀 개수가 유효하지 않습니다."),
+  EVENT_PASSWORD_INVALID(HttpStatus.BAD_REQUEST, "EVENT-0006", "비밀번호 혹은 초대코드가 유효하지 않습니다."),
 
   // 초대 코드 관련 오류
   INVITE_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "EVENT-0100", "존재하지 않는 초대 코드입니다."),

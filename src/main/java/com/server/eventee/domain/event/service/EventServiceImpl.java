@@ -51,15 +51,16 @@ public class EventServiceImpl implements EventService {
 
   @Transactional
   @Override
-  public EventResponse.JoinResponse joinEvent(Member member, String inviteCode) {
-    Event event = eventRepository.findByInviteCode(inviteCode)
-        .orElseThrow(() -> new EventHandler(EventErrorStatus.INVITE_CODE_NOT_FOUND));
+  public EventResponse.JoinResponse joinEvent(Member member, EventRequest.JoinRequest request) {
+    Event event = eventRepository.findByInviteCode(request.inviteCode())
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
 
-    if ("CLOSED".equalsIgnoreCase(event.getStatus())) {
-      throw new EventHandler(EventErrorStatus.EVENT_CLOSED);
+    if (!event.getPassword().equals(request.password())) {
+      throw new EventHandler(EventErrorStatus.EVENT_PASSWORD_INVALID);
     }
 
-    MemberEvent memberEvent = memberEventRepository.findByMemberAndEventAndIsDeletedFalse(member, event)
+    MemberEvent memberEvent = memberEventRepository
+        .findByMemberAndEventAndIsDeletedFalse(member, event)
         .orElseGet(() -> {
           MemberEvent newJoin = eventConverter.toParticipantRelation(member, event);
           return memberEventRepository.save(newJoin);
@@ -67,4 +68,5 @@ public class EventServiceImpl implements EventService {
 
     return eventConverter.toJoinResponse(event, memberEvent);
   }
+
 }

@@ -33,11 +33,15 @@ public class EventRequest {
       Integer teamCount
   ) {}
 
-  @Schema(description = "이벤트 초대 코드 입장 요청 DTO")
+  @Schema(description = "이벤트 초대 코드 및 비밀번호 검증 요청 DTO")
   public record JoinRequest(
 
       @NotBlank
-      @Schema(description = "이벤트 초대 코드 (대문자 6자리)", example = "ABCDEF")
-      String inviteCode
+      @Schema(description = "이벤트 초대 코드", example = "ABCDEF")
+      String inviteCode,
+
+      @NotBlank
+      @Schema(description = "이벤트 비밀번호", example = "1234")
+      String password
   ) {}
 }

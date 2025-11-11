@@ -8,5 +8,5 @@ public interface EventService {
 
   EventResponse.CreateResponse createEvent(Member member, EventRequest.CreateRequest request);
 
-  EventResponse.JoinResponse joinEvent(Member member, String inviteCode);
+  EventResponse.JoinResponse joinEvent(Member member, EventRequest.JoinRequest inviteCode);
 }
