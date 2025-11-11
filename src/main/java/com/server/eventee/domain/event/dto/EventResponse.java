@@ -1,6 +1,7 @@
 package com.server.eventee.domain.event.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.Builder;
 import java.time.LocalDateTime;
 
@@ -51,6 +52,7 @@ public class EventResponse {
   @Schema(description = "이벤트 초대 코드 입장 응답 DTO")
   @Builder
   public record JoinResponse(
+
       @Schema(description = "이벤트 ID", example = "15")
       Long eventId,
 
@@ -67,6 +69,33 @@ public class EventResponse {
       Integer teamCount,
 
       @Schema(description = "현재 사용자의 이벤트 내 역할 (HOST 또는 PARTICIPANT)", example = "PARTICIPANT")
-      String role
-  ) {}
+      String role,
+
+      @Schema(description = "이벤트 내 그룹(팀) 목록")
+      List<GroupInfo> groups
+  ) {
+
+    @Builder
+    @Schema(description = "그룹(팀) 정보 DTO")
+    public record GroupInfo(
+        @Schema(description = "그룹 ID", example = "1")
+        Long groupId,
+
+        @Schema(description = "그룹 이름", example = "1조")
+        String groupName,
+
+        @Schema(description = "그룹 설명", example = "자동 생성된 그룹입니다.")
+        String groupDescription,
+
+        @Schema(description = "그룹 이미지", example = "https://eventee-bucket.s3.ap-northeast-2.amazonaws.com/group/defaultGroupImage.png")
+        String groupImg,
+
+        @Schema(description = "그룹 순번", example = "1")
+        int groupNo,
+
+        @Schema(description = "그룹 리더 닉네임", example = "혜진님")
+        String groupLeader
+    ) {}
+  }
+
 }

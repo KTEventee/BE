@@ -20,6 +20,10 @@ public class EventRequest {
       @Schema(description = "이벤트 설명", example = "교내 동아리 봄 소풍 행사입니다.")
       String description,
 
+      @NotBlank
+      @Schema(description = "이벤트 비밀번호 (입장 시 검증용)", example = "1234")
+      String password,
+
       @NotNull
       @Schema(description = "이벤트 시작 시각", example = "2025-04-10T09:00:00")
       LocalDateTime startAt,

@@ -1,10 +1,12 @@
 package com.server.eventee.domain.event.converter;
 
 import com.server.eventee.domain.event.dto.EventResponse;
+import com.server.eventee.domain.event.dto.EventResponse.JoinResponse.GroupInfo;
 import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.event.model.MemberEvent;
 import com.server.eventee.domain.group.model.Group;
 import com.server.eventee.domain.member.model.Member;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -19,10 +21,11 @@ public class EventConverter {
       "https://eventee-bucket.s3.ap-northeast-2.amazonaws.com/group/defaultGroupImage.png";
 
   public Event toEvent(String inviteCode, String title, String description,
-      LocalDateTime startAt, LocalDateTime endAt, Integer teamCount) {
+      String password, LocalDateTime startAt, LocalDateTime endAt, Integer teamCount) {
     return Event.builder()
         .title(title)
         .description(description)
+        .password(password)
         .startAt(startAt)
         .endAt(endAt)
         .inviteCode(inviteCode)
@@ -80,6 +83,17 @@ public class EventConverter {
 
 
   public EventResponse.JoinResponse toJoinResponse(Event event, MemberEvent memberEvent) {
+    List<GroupInfo> groupInfos = event.getGroups().stream()
+        .map(group -> EventResponse.JoinResponse.GroupInfo.builder()
+            .groupId(group.getGroupId())
+            .groupName(group.getGroupName())
+            .groupDescription(group.getGroupDescription())
+            .groupImg(group.getGroupImg())
+            .groupNo(group.getGroupNo())
+            .groupLeader(group.getGroupLeader())
+            .build())
+        .toList();
+
     return EventResponse.JoinResponse.builder()
         .eventId(event.getId())
         .title(event.getTitle())
@@ -87,6 +101,8 @@ public class EventConverter {
         .thumbnailUrl(event.getThumbnailUrl())
         .teamCount(event.getTeamCount())
         .role(memberEvent.getRole().name())
+        .groups(groupInfos)
         .build();
   }
+
 }
