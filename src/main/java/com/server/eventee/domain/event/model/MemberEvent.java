@@ -1,6 +1,5 @@
 package com.server.eventee.domain.event.model;
 
-import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -24,26 +23,32 @@ public class MemberEvent extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  // 회원 FK
   @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
 
-  /** 이벤트 FK */
   @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "event_id", nullable = false)
   private Event event;
 
-  /** 역할: HOST / PARTICIPANT */
   @NotNull
   @Enumerated(EnumType.STRING)
   @Column(name = "role", nullable = false, length = 20)
   private MemberEventRole role;
 
+  // 이벤트별 닉네임 , 닉넴 업뎃
+  @NotNull
+  @Column(name = "nickname", length = 30)
+  private String nickname;
+
   public enum MemberEventRole {
     HOST,
     PARTICIPANT
+  }
+
+  public void updateNickname(String nickname) {
+    this.nickname = nickname;
   }
 }

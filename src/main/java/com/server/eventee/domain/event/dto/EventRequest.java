@@ -46,6 +46,10 @@ public class EventRequest {
 
       @NotBlank
       @Schema(description = "이벤트 비밀번호", example = "1234")
-      String password
+      String password,
+
+      @Schema(description = "이벤트 내에서 사용할 닉네임", example = "가나다")
+      @NotBlank String nickname
+
   ) {}
 }
