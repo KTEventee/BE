@@ -33,13 +33,21 @@ public class EventController {
     return BaseResponse.of(SuccessCode.SUCCESS, response);
   }
 
-  @Operation(summary = "이벤트 초대 코드로 입장", description = "초대 코드를 입력하여 이벤트에 입장합니다. 이미 참여 중이면 기존 역할(HOST / PARTICIPANT)을 반환합니다.")
+  @Operation(
+      summary = "이벤트 초대 코드 및 비밀번호로 입장",
+      description = """
+        초대 코드와 비밀번호를 검증한 뒤 이벤트에 입장합니다.
+        이미 참여 중이면 기존 역할(HOST / PARTICIPANT)을 반환하고,
+        처음 입장하는 경우 자동으로 PARTICIPANT로 등록됩니다.
+        """
+  )
   @PostMapping("/join")
   public BaseResponse<EventResponse.JoinResponse> joinEvent(
       @CurrentMember Member member,
-      @RequestParam("inviteCode") String inviteCode) {
-
-    EventResponse.JoinResponse response = eventService.joinEvent(member, inviteCode);
+      @Valid @RequestBody EventRequest.JoinRequest request
+  ) {
+    EventResponse.JoinResponse response = eventService.joinEvent(member, request);
     return BaseResponse.of(SuccessCode.SUCCESS, response);
   }
+
 }
