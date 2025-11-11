@@ -24,7 +24,7 @@ public class MemberEvent extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  /** 회원 FK */
+  // 회원 FK
   @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
