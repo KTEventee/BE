@@ -12,6 +12,7 @@ import com.server.eventee.domain.event.repository.MemberEventRepository;
 import com.server.eventee.domain.group.model.Group;
 import com.server.eventee.domain.group.repository.GroupRepository;
 import com.server.eventee.domain.member.model.Member;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
@@ -64,18 +65,29 @@ public class EventServiceImpl implements EventService {
     Event event = eventRepository.findByInviteCode(request.inviteCode())
         .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
 
-    if (!event.getPassword().equals(request.password())) {
+    if (!Objects.equals(event.getPassword(), request.password())) {
       throw new EventHandler(EventErrorStatus.EVENT_PASSWORD_INVALID);
     }
 
     MemberEvent memberEvent = memberEventRepository
         .findByMemberAndEventAndIsDeletedFalse(member, event)
-        .orElseGet(() -> {
-          MemberEvent newJoin = eventConverter.toParticipantRelation(member, event);
-          return memberEventRepository.save(newJoin);
-        });
+        .orElse(null);
+
+    if (memberEvent == null) {
+      memberEvent = MemberEvent.builder()
+          .member(member)
+          .event(event)
+          .role(MemberEvent.MemberEventRole.PARTICIPANT)
+          .nickname(request.nickname())
+          .build();
+      memberEventRepository.save(memberEvent);
+    } else {
+      memberEvent.updateNickname(request.nickname());
+    }
 
     return eventConverter.toJoinResponse(event, memberEvent);
   }
+
+
 
 }
