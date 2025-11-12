@@ -1,6 +1,7 @@
 package com.server.eventee.domain.group.model;
 
-import com.server.eventee.domain.Post.model.Post;
+import com.server.eventee.domain.post.model.Post;
+import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.group.dto.GroupReqeust;
 import com.server.eventee.global.entity.BaseEntity;
 import com.server.eventee.domain.member.model.Member;
@@ -36,6 +37,10 @@ public class Group extends BaseEntity {
     private List<Post> posts = new ArrayList<>();
 
     //NOTE member,event 추가해야함
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id")
+    @NotNull
+    private Event event;
 
     @Builder(toBuilder = true)
     private Group(

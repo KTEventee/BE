@@ -1,6 +1,6 @@
-package com.server.eventee.domain.Post.repository;
+package com.server.eventee.domain.post.repository;
 
-import com.server.eventee.domain.Post.model.Post;
+import com.server.eventee.domain.post.model.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

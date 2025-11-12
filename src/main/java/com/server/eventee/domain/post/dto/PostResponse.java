@@ -1,8 +1,7 @@
-package com.server.eventee.domain.Post.dto;
+package com.server.eventee.domain.post.dto;
 
-import com.server.eventee.domain.Post.model.Post;
-import com.server.eventee.domain.Post.model.PostType;
-import com.server.eventee.domain.Post.model.VoteLog;
+import com.server.eventee.domain.post.model.Post;
+import com.server.eventee.domain.post.model.PostType;
 import com.server.eventee.domain.comment.dto.CommentResponse;
 import com.server.eventee.domain.group.model.Group;
 

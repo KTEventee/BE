@@ -1,6 +1,6 @@
 package com.server.eventee.domain.comment.model;
 
-import com.server.eventee.domain.Post.model.Post;
+import com.server.eventee.domain.post.model.Post;
 import com.server.eventee.domain.comment.dto.CommentRequest;
 import com.server.eventee.global.entity.BaseEntity;
 import jakarta.persistence.*;

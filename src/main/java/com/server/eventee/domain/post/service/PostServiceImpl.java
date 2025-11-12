@@ -1,12 +1,12 @@
-package com.server.eventee.domain.Post.service;
+package com.server.eventee.domain.post.service;
 
-import com.server.eventee.domain.Post.dto.PostRequest;
-import com.server.eventee.domain.Post.dto.PostResponse;
-import com.server.eventee.domain.Post.model.Post;
-import com.server.eventee.domain.Post.model.PostType;
-import com.server.eventee.domain.Post.model.VoteLog;
-import com.server.eventee.domain.Post.repository.PostRepository;
-import com.server.eventee.domain.Post.repository.VoteLogRepository;
+import com.server.eventee.domain.post.dto.PostRequest;
+import com.server.eventee.domain.post.dto.PostResponse;
+import com.server.eventee.domain.post.model.Post;
+import com.server.eventee.domain.post.model.PostType;
+import com.server.eventee.domain.post.model.VoteLog;
+import com.server.eventee.domain.post.repository.PostRepository;
+import com.server.eventee.domain.post.repository.VoteLogRepository;
 import com.server.eventee.domain.group.model.Group;
 import com.server.eventee.domain.group.repository.GroupRepository;
 import com.server.eventee.global.exception.BaseException;

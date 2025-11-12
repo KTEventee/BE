@@ -1,7 +1,7 @@
-package com.server.eventee.domain.Post.service;
+package com.server.eventee.domain.post.service;
 
-import com.server.eventee.domain.Post.dto.PostRequest;
-import com.server.eventee.domain.Post.dto.PostResponse;
+import com.server.eventee.domain.post.dto.PostRequest;
+import com.server.eventee.domain.post.dto.PostResponse;
 
 public interface PostService {
 

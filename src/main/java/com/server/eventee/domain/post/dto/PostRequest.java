@@ -1,4 +1,4 @@
-package com.server.eventee.domain.Post.dto;
+package com.server.eventee.domain.post.dto;
 
 public class PostRequest {
 
