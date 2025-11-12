@@ -12,6 +12,8 @@ import com.server.eventee.domain.event.repository.MemberEventRepository;
 import com.server.eventee.domain.group.model.Group;
 import com.server.eventee.domain.group.repository.GroupRepository;
 import com.server.eventee.domain.member.model.Member;
+import com.server.eventee.domain.post.model.Post;
+import com.server.eventee.domain.post.repository.PostRepository;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class EventServiceImpl implements EventService {
   private final EventRepository eventRepository;
   private final MemberEventRepository memberEventRepository;
   private final GroupRepository groupRepository;
+  private final PostRepository postRepository;
   private final EventConverter eventConverter;
 
   @Transactional
@@ -109,6 +112,28 @@ public class EventServiceImpl implements EventService {
     return eventConverter.toEventWithGroupsResponse(event, groups);
   }
 
+  @Transactional(readOnly = true)
+  @Override
+  public EventResponse.GroupPostsResponse getGroupPosts(Member member, Long eventId, Long groupId) {
+    Event event = eventRepository.findById(eventId)
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
+
+    boolean isParticipant = memberEventRepository.existsByMemberAndEventAndIsDeletedFalse(member, event);
+    if (!isParticipant) {
+      throw new EventHandler(EventErrorStatus.EVENT_ACCESS_DENIED);
+    }
+
+    Group group = groupRepository.findGroupByGroupId(groupId)
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.GROUP_NOT_FOUND));
+
+    if (!Objects.equals(group.getEvent().getId(), eventId)) {
+      throw new EventHandler(EventErrorStatus.GROUP_NOT_BELONGS_TO_EVENT);
+    }
+
+    List<Post> posts = postRepository.findAllByGroupAndIsDeletedFalse(group);
+
+    return eventConverter.toGroupPostsResponse(group, posts);
+  }
 
 
 }

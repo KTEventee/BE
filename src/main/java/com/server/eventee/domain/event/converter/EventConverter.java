@@ -1,15 +1,14 @@
 package com.server.eventee.domain.event.converter;
 
 import com.server.eventee.domain.event.dto.EventResponse;
-import com.server.eventee.domain.event.dto.EventResponse.JoinResponse.GroupInfo;
 import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.event.model.MemberEvent;
 import com.server.eventee.domain.group.model.Group;
 import com.server.eventee.domain.member.model.Member;
+import com.server.eventee.domain.post.model.Post;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 @Component
 public class EventConverter {
@@ -43,14 +42,6 @@ public class EventConverter {
         .build();
   }
 
-  public MemberEvent toParticipantRelation(Member member, Event event) {
-    return MemberEvent.builder()
-        .member(member)
-        .event(event)
-        .role(MemberEvent.MemberEventRole.PARTICIPANT)
-        .build();
-  }
-
   public Group toGroup(int groupNo, Member leader, Event event) {
     return Group.builder()
         .groupName("팀 " + groupNo + "조")
@@ -81,9 +72,77 @@ public class EventConverter {
         .build();
   }
 
+  public EventResponse.EventWithGroupsResponse toEventWithGroupsResponse(Event event, List<Group> groups) {
+    List<EventResponse.EventWithGroupsResponse.GroupSummary> groupDtos = groups.stream()
+        .map(g -> EventResponse.EventWithGroupsResponse.GroupSummary.builder()
+            .groupId(g.getGroupId())
+            .groupName(g.getGroupName())
+            .groupDescription(g.getGroupDescription())
+            .groupImg(g.getGroupImg())
+            .groupNo(g.getGroupNo())
+            .groupLeader(g.getGroupLeader())
+            .build())
+        .toList();
+
+    return EventResponse.EventWithGroupsResponse.builder()
+        .eventId(event.getId())
+        .eventTitle(event.getTitle())
+        .eventDescription(event.getDescription())
+        .thumbnailUrl(event.getThumbnailUrl())
+        .startAt(event.getStartAt())
+        .endAt(event.getEndAt())
+        .teamCount(event.getTeamCount())
+        .groups(groupDtos)
+        .build();
+  }
+
+  public EventResponse.GroupPostsResponse toGroupPostsResponse(Group group, List<Post> posts) {
+    List<EventResponse.GroupPostsResponse.PostInfo> postInfos = posts.stream()
+        .map(this::convertPostToDto)
+        .toList();
+
+    return EventResponse.GroupPostsResponse.builder()
+        .groupId(group.getGroupId())
+        .groupName(group.getGroupName())
+        .posts(postInfos)
+        .build();
+  }
+
+  private EventResponse.GroupPostsResponse.PostInfo convertPostToDto(Post post) {
+    return EventResponse.GroupPostsResponse.PostInfo.builder()
+        .postId(post.getPostId())
+        .content(post.getContent())
+        .postType(post.getPostType().name())
+        .createdAt(post.getCreatedAt())
+        .comments(convertComments(post))
+        .voteLogs(convertVoteLogs(post))
+        .build();
+  }
+
+  private List<EventResponse.GroupPostsResponse.CommentInfo> convertComments(Post post) {
+    return post.getComments().stream()
+        .map(c -> EventResponse.GroupPostsResponse.CommentInfo.builder()
+            .commentId(c.getCommentId())
+            .content(c.getContent())
+            .writerNickname(c.getMember().getNickname())
+            .writerProfileUrl(c.getMember().getProfileImageUrl())
+            .createdAt(c.getCreatedAt())
+            .build())
+        .toList();
+  }
+
+
+  private List<EventResponse.GroupPostsResponse.VoteLogInfo> convertVoteLogs(Post post) {
+    return post.getVoteLogs().stream()
+        .map(v -> EventResponse.GroupPostsResponse.VoteLogInfo.builder()
+            .voteLogId(v.getVoteLogId())
+            .voteWord(v.getVoteWord())
+            .build())
+        .toList();
+  }
 
   public EventResponse.JoinResponse toJoinResponse(Event event, MemberEvent memberEvent) {
-    List<GroupInfo> groupInfos = event.getGroups().stream()
+    List<EventResponse.JoinResponse.GroupInfo> groupInfos = event.getGroups().stream()
         .map(group -> EventResponse.JoinResponse.GroupInfo.builder()
             .groupId(group.getGroupId())
             .groupName(group.getGroupName())
@@ -104,30 +163,5 @@ public class EventConverter {
         .groups(groupInfos)
         .build();
   }
-
-  public EventResponse.EventWithGroupsResponse toEventWithGroupsResponse(Event event, List<Group> groups) {
-    List<EventResponse.EventWithGroupsResponse.GroupSummary> groupDtos = groups.stream()
-        .map(group -> EventResponse.EventWithGroupsResponse.GroupSummary.builder()
-            .groupId(group.getGroupId())
-            .groupName(group.getGroupName())
-            .groupDescription(group.getGroupDescription())
-            .groupImg(group.getGroupImg())
-            .groupNo(group.getGroupNo())
-            .groupLeader(group.getGroupLeader())
-            .build())
-        .toList();
-
-    return EventResponse.EventWithGroupsResponse.builder()
-        .eventId(event.getId())
-        .eventTitle(event.getTitle())
-        .eventDescription(event.getDescription())
-        .thumbnailUrl(event.getThumbnailUrl())
-        .startAt(event.getStartAt())
-        .endAt(event.getEndAt())
-        .teamCount(event.getTeamCount())
-        .groups(groupDtos)
-        .build();
-  }
-
 
 }

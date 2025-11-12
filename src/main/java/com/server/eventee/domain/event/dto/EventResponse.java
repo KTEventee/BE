@@ -148,6 +148,70 @@ public class EventResponse {
         String groupLeader
     ) {}
   }
+  @Schema(description = "그룹별 포스트 및 투표 조회 응답 DTO")
+  @Builder
+  public record GroupPostsResponse(
+      @Schema(description = "그룹 ID", example = "10")
+      Long groupId,
 
+      @Schema(description = "그룹 이름", example = "1조")
+      String groupName,
+
+      @Schema(description = "포스트 목록")
+      List<PostInfo> posts
+  ) {
+
+    @Builder
+    @Schema(description = "포스트 정보 DTO")
+    public record PostInfo(
+        @Schema(description = "포스트 ID", example = "100")
+        Long postId,
+
+        @Schema(description = "포스트 내용", example = "오늘 점심 뭐 먹을까요?")
+        String content,
+
+        @Schema(description = "포스트 타입(TEXT / VOTE)", example = "TEXT")
+        String postType,
+
+        @Schema(description = "생성 시각", example = "2025-11-12T09:00:00")
+        LocalDateTime createdAt,
+
+        @Schema(description = "댓글 목록")
+        List<CommentInfo> comments,
+
+        @Schema(description = "투표 목록")
+        List<VoteLogInfo> voteLogs
+    ) {}
+
+    @Builder
+    @Schema(description = "댓글 정보 DTO")
+    public record CommentInfo(
+        @Schema(description = "댓글 ID", example = "1")
+        Long commentId,
+
+        @Schema(description = "댓글 내용", example = "김치찌개요!")
+        String content,
+
+        @Schema(description = "작성자 닉네임", example = "혜진님")
+        String writerNickname,
+
+        @Schema(description = "작성자 프로필 이미지", example = "https://eventee-bucket.s3.ap-northeast-2.amazonaws.com/profile/7.jpg")
+        String writerProfileUrl,
+
+        @Schema(description = "작성 시각", example = "2025-11-12T09:05:00")
+        LocalDateTime createdAt
+    ) {}
+
+    @Builder
+    @Schema(description = "투표 정보 DTO")
+    public record VoteLogInfo(
+        @Schema(description = "투표 ID", example = "3")
+        Long voteLogId,
+
+        @Schema(description = "투표 항목", example = "치킨")
+        String voteWord
+    ) {}
+
+  }
 
 }
