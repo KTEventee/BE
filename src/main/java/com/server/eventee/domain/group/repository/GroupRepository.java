@@ -10,5 +10,5 @@ import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<Group,Long> {
     Optional<Group> findGroupByGroupId(Long groupId);
-    List<Group> findAllByEventAndIsDeletedFalse(Event event);
+    List<Group> findAllByEventId(Long eventId);
 }

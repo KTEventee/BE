@@ -1,5 +1,6 @@
 package com.server.eventee.domain.comment.model;
 
+import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.post.model.Post;
 import com.server.eventee.domain.comment.dto.CommentRequest;
 import com.server.eventee.global.entity.BaseEntity;
@@ -23,7 +24,10 @@ public class Comment extends BaseEntity {
     private Long commentId;
 
     //fixme 댓글 작성자
-//    private Member member;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
 
     private String content;
 

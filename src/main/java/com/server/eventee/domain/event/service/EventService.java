@@ -9,4 +9,6 @@ public interface EventService {
   EventResponse.CreateResponse createEvent(Member member, EventRequest.CreateRequest request);
 
   EventResponse.JoinResponse joinEvent(Member member, EventRequest.JoinRequest inviteCode);
+  EventResponse.EventWithGroupsResponse getEventGroups(Member member, Long eventId);
+  EventResponse.GroupPostsResponse getGroupPosts(Member member, Long eventId, Long groupId);
 }
