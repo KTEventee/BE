@@ -41,6 +41,7 @@ jobs:
           --health-retries=5
 
     env:
+      SPRING_PROFILES_ACTIVE: test
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
@@ -48,7 +49,6 @@ jobs:
       AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
       AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
       AWS_S3_TEST_PREFIX: ${{ secrets.AWS_S3_TEST_PREFIX }}
-      SPRING_PROFILES_ACTIVE: test
 
     steps:
       - name: Checkout Repository
