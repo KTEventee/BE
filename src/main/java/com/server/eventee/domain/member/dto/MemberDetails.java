@@ -1,28 +1,27 @@
 package com.server.eventee.domain.member.dto;
 
+import com.server.eventee.domain.member.model.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public record MemberDetails(MemberAuthContext context) implements UserDetails {
+/**
+ * Spring Security에서 인증된 사용자 정보를 보관하는 클래스.
+ * - Principal 객체로 사용되며, @AuthenticationPrincipal / @CurrentMember 에서 접근 가능.
+ */
+public record MemberDetails(MemberAuthContext context, Member member) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<String> roles = new ArrayList<>();
-        roles.add("ROLE_" + context.role());
-        return roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        return List.of(new SimpleGrantedAuthority("ROLE_" + context.role()));
     }
 
     @Override
     public String getPassword() {
-        return context.password();
+        return null;
     }
 
     @Override

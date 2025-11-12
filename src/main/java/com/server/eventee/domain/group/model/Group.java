@@ -1,6 +1,5 @@
 package com.server.eventee.domain.group.model;
 
-
 import com.server.eventee.domain.Post.model.Post;
 import com.server.eventee.domain.group.dto.GroupReqeust;
 import com.server.eventee.global.entity.BaseEntity;
@@ -18,8 +17,8 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "group")
-@SQLDelete(sql = "UPDATE group SET is_deleted = true, deleted_at = now() where id = ?")
+@Table(name = "event_group")
+@SQLDelete(sql = "UPDATE event_group SET is_deleted = true, deleted_at = now() where group_id = ?")
 @SQLRestriction("is_deleted is FALSE")
 public class Group extends BaseEntity {
 
@@ -40,12 +39,13 @@ public class Group extends BaseEntity {
 
     @Builder(toBuilder = true)
     private Group(
-            Long groupId,
-            @NotNull String groupName,
-            @NotNull String groupDescription,
-            @NotNull String groupImg,
-            @NotNull int groupNo,
-            @NotNull String groupLeader
+        Long groupId,
+        @NotNull String groupName,
+        @NotNull String groupDescription,
+        @NotNull String groupImg,
+        @NotNull int groupNo,
+        @NotNull String groupLeader,
+        @NotNull Event event
     ) {
         this.groupId = groupId;
         this.groupName = groupName;
@@ -53,6 +53,7 @@ public class Group extends BaseEntity {
         this.groupImg = groupImg;
         this.groupNo = groupNo;
         this.groupLeader = groupLeader;
+        this.event = event;
     }
 
     public boolean updateLeader(GroupReqeust.GroupUpdateLeaderDto dto){
