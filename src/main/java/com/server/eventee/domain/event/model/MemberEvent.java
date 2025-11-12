@@ -1,7 +1,7 @@
 package com.server.eventee.domain.event.model;
 
 import com.server.eventee.domain.member.model.Member;
-import com.server.eventee.global.entity.BaseEnti;
+import com.server.eventee.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
