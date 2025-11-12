@@ -9,7 +9,6 @@ on:
 jobs:
   CI:
     name: Continuous Integration
-    if: github.event_name != 'push' || github.event.created == false
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -78,12 +77,9 @@ jobs:
 
       - name: Build & Test
         id: build
-        continue-on-error: true
         run: |
           set -o pipefail
-          /usr/bin/time -f "elapsed=%E cpu=%P mem=%MKB" \
-            ./gradlew --no-daemon clean build --profile 2>&1 | tee build.log
-          echo "gradle_exit=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          ./gradlew --no-daemon clean build --profile 2>&1 | tee build.log
 
       - name: Publish Test Results
         if: always()
@@ -93,14 +89,8 @@ jobs:
           comment_mode: always
 
       - name: Upload Build Log
-        if: failure() || steps.build.outputs.gradle_exit != '0'
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
           path: build.log
-
-      - name: Fail if Gradle failed
-        if: steps.build.outputs.gradle_exit != '0'
-        run: |
-          echo "Gradle build failed with exit code ${{ steps.build.outputs.gradle_exit }}"
-          exit 1
