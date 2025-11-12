@@ -77,10 +77,12 @@ jobs:
           echo "PostgreSQL & Redis are ready!"
 
       - name: Build & Test
+        id: build
         run: |
-          set -e
-          /usr/bin/time -f "elapsed=%E cpu=%P mem=%MKB" \
-            ./gradlew --no-daemon clean build --profile |& tee build.log
+          set +e
+          ./gradlew --no-daemon clean build --profile |& tee build.log
+          echo "gradle_exit=$?" >> $GITHUB_OUTPUT
+          exit 0  # 강제 성공으로 다음 단계 실행되게 함
 
       - name: Publish Test Results
         if: always()
@@ -90,8 +92,14 @@ jobs:
           comment_mode: always
 
       - name: Upload Build Log
-        if: failure()
+        if: failure() || steps.build.outputs.gradle_exit != '0'
         uses: actions/upload-artifact@v4
         with:
           name: build-log
           path: build.log
+
+      - name: Fail if Gradle failed
+        if: steps.build.outputs.gradle_exit != '0'
+        run: |
+          echo "Gradle build failed with exit code ${{ steps.build.outputs.gradle_exit }}"
+          exit 1
