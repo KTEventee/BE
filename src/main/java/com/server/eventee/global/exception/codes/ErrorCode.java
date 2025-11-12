@@ -61,7 +61,13 @@ public enum ErrorCode implements BaseCode {
     // @RequestBody 및 @RequestParam, @PathVariable 값이 유효하지 않음
     NOT_VALID_HEADER_ERROR(HttpStatus.NOT_FOUND, "G012", "Header에 데이터가 존재하지 않는 경우 "),
 
+    //post에러
     POST_NOT_FOUND(HttpStatus.BAD_REQUEST,"POST-0000","게시글을 찾을 수 없음"),
+    POST_TYPE_NOT_VALID(HttpStatus.BAD_REQUEST, "POST-0001", "해당 타입은 존재하지 않는 타입입니다."),
+    POST_TYPE_NOT_VOTE(HttpStatus.BAD_REQUEST, "POST-0001", "해당 타입은 투표용 게시글이 아닙니다."),
+
+    //댓글 에러
+    COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT-0000", "해당 댓글을 찾을 수 없습니다."),
     
     //자잘한 에러
     SEARCH_KEYWORD_TOO_SHORT(HttpStatus.BAD_REQUEST, "KEYWORD-0000", "검색어는 3글자부터 입력하세요."),
@@ -79,7 +85,7 @@ public enum ErrorCode implements BaseCode {
 
     //GroupError
     GROUP_NOT_FOUND(HttpStatus.BAD_REQUEST, "GROUP-0000", "해당 ID를 가진 그룹을 찾을 수 없습니다."),
-
+    
     //JWT error
     EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "TOKEN-0000", "AccessToken 기간 만료됨"),
     INVALID_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN-0001", "토큰이 올바르지 않습니다."),

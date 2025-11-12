@@ -1,6 +1,7 @@
 package com.server.eventee.domain.group.model;
 
 
+import com.server.eventee.domain.Post.model.Post;
 import com.server.eventee.domain.group.dto.GroupReqeust;
 import com.server.eventee.global.entity.BaseEntity;
 import com.server.eventee.domain.member.model.Member;
@@ -10,6 +11,8 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -29,6 +32,9 @@ public class Group extends BaseEntity {
     @NotNull private String groupImg;
     @NotNull private int groupNo;
     @NotNull private String groupLeader;
+
+    @OneToMany
+    private List<Post> posts = new ArrayList<>();
 
     //NOTE member,event 추가해야함
 
@@ -88,6 +94,16 @@ public class Group extends BaseEntity {
         }
 
         return changed;
+    }
+
+    public void addPost(Post post){
+        if(posts.contains(post)) return;
+        posts.add(post);
+    }
+
+    public void deletePost(Post post){
+        if(!posts.contains(post)) return;
+        posts.remove(post);
     }
 
     public void addMember(Member member){
