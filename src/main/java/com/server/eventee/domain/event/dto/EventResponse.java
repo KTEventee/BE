@@ -97,5 +97,57 @@ public class EventResponse {
         String groupLeader
     ) {}
   }
+  @Schema(description = "이벤트 + 그룹 목록 응답 DTO")
+  @Builder
+  public record EventWithGroupsResponse(
+
+      @Schema(description = "이벤트 ID", example = "1")
+      Long eventId,
+
+      @Schema(description = "이벤트 제목", example = "xx대학교 MT")
+      String eventTitle,
+
+      @Schema(description = "이벤트 설명", example = "즐거운 1박 2일 MT 일정입니다.")
+      String eventDescription,
+
+      @Schema(description = "이벤트 썸네일 이미지 URL")
+      String thumbnailUrl,
+
+      @Schema(description = "이벤트 시작 시각")
+      LocalDateTime startAt,
+
+      @Schema(description = "이벤트 종료 시각")
+      LocalDateTime endAt,
+
+      @Schema(description = "팀(조) 개수", example = "4")
+      Integer teamCount,
+
+      @Schema(description = "이벤트 내 그룹 목록")
+      List<GroupSummary> groups
+  ) {
+
+    @Builder
+    @Schema(description = "이벤트 내 그룹 요약 DTO")
+    public record GroupSummary(
+        @Schema(description = "그룹 ID", example = "10")
+        Long groupId,
+
+        @Schema(description = "그룹 이름", example = "1조")
+        String groupName,
+
+        @Schema(description = "그룹 설명", example = "자동 생성된 그룹입니다.")
+        String groupDescription,
+
+        @Schema(description = "그룹 이미지", example = "https://eventee-bucket.s3.ap-northeast-2.amazonaws.com/group/defaultGroupImage.png")
+        String groupImg,
+
+        @Schema(description = "그룹 순번", example = "1")
+        int groupNo,
+
+        @Schema(description = "그룹 리더 닉네임", example = "혜진님")
+        String groupLeader
+    ) {}
+  }
+
 
 }

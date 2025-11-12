@@ -105,4 +105,29 @@ public class EventConverter {
         .build();
   }
 
+  public EventResponse.EventWithGroupsResponse toEventWithGroupsResponse(Event event, List<Group> groups) {
+    List<EventResponse.EventWithGroupsResponse.GroupSummary> groupDtos = groups.stream()
+        .map(group -> EventResponse.EventWithGroupsResponse.GroupSummary.builder()
+            .groupId(group.getGroupId())
+            .groupName(group.getGroupName())
+            .groupDescription(group.getGroupDescription())
+            .groupImg(group.getGroupImg())
+            .groupNo(group.getGroupNo())
+            .groupLeader(group.getGroupLeader())
+            .build())
+        .toList();
+
+    return EventResponse.EventWithGroupsResponse.builder()
+        .eventId(event.getId())
+        .eventTitle(event.getTitle())
+        .eventDescription(event.getDescription())
+        .thumbnailUrl(event.getThumbnailUrl())
+        .startAt(event.getStartAt())
+        .endAt(event.getEndAt())
+        .teamCount(event.getTeamCount())
+        .groups(groupDtos)
+        .build();
+  }
+
+
 }

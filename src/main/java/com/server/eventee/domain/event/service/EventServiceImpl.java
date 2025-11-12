@@ -12,6 +12,7 @@ import com.server.eventee.domain.event.repository.MemberEventRepository;
 import com.server.eventee.domain.group.model.Group;
 import com.server.eventee.domain.group.repository.GroupRepository;
 import com.server.eventee.domain.member.model.Member;
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -86,6 +87,26 @@ public class EventServiceImpl implements EventService {
     }
 
     return eventConverter.toJoinResponse(event, memberEvent);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public EventResponse.EventWithGroupsResponse getEventGroups(Member member, Long eventId) {
+    // 이벤트 존재 여부 검증
+    Event event = eventRepository.findById(eventId)
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
+
+    // 로그인한 사용자가 이벤트 참여자인지 검증
+    boolean isParticipant = memberEventRepository.existsByMemberAndEventAndIsDeletedFalse(member, event);
+    if (!isParticipant) {
+      throw new EventHandler(EventErrorStatus.EVENT_ACCESS_DENIED);
+    }
+
+    // 그룹 목록 조회
+    List<Group> groups = groupRepository.findAllByEventId(eventId);
+
+    // Converter를 이용해 DTO 변환
+    return eventConverter.toEventWithGroupsResponse(event, groups);
   }
 
 
