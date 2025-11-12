@@ -1,7 +1,7 @@
-package com.server.eventee.domain.Post.controller;
+package com.server.eventee.domain.post.controller;
 
-import com.server.eventee.domain.Post.dto.PostRequest;
-import com.server.eventee.domain.Post.service.PostService;
+import com.server.eventee.domain.post.dto.PostRequest;
+import com.server.eventee.domain.post.service.PostService;
 import com.server.eventee.global.exception.BaseException;
 import com.server.eventee.global.exception.BaseResponse;
 import com.server.eventee.global.exception.codes.ErrorCode;
