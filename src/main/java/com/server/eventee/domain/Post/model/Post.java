@@ -35,6 +35,8 @@ public class Post extends BaseEntity {
     private Member member;
 
     private String content;
+    private String voteTitle = null;
+    private String voteContent = null;
 
     @Enumerated(EnumType.STRING)
     private PostType postType;
@@ -69,10 +71,14 @@ public class Post extends BaseEntity {
     }
 
     @Builder
-    public Post(String content, PostType type,Group group){
+    public Post(String content, PostType type,Group group,String voteTitle,String voteContent){
         this.content = content;
         this.postType = type;
         this.group = group;
+        if(this.postType.equals(PostType.VOTE)) {
+            this.voteTitle = voteTitle;
+            this.voteContent = voteContent;
+        }
     }
 
     public void updatePost(PostRequest.PostDto dto){

@@ -41,12 +41,12 @@ public class PostServiceImpl implements PostService{
 
         PostType postType = PostType.from(request.type());
 
-        //fixme 투표 형태일때 string 어떻게 받아올건지 정해함.
-        //요소들 어떻게든 받아옴.
         Post post = Post.builder()
                 .content(request.content())
                 .type(postType)
                 .group(group)
+                .voteTitle(request.voteTitle())
+                .voteContent(request.voteContent())
                 .build();
 
         group.addPost(post);
@@ -90,7 +90,6 @@ public class PostServiceImpl implements PostService{
                     ErrorCode.POST_TYPE_NOT_VOTE
             );
         }
-
 
         VoteLog log = VoteLog.builder()
                 .post(post)

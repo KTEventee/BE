@@ -15,6 +15,8 @@ public class PostResponse {
             String content,
             String writerName,
             String type,
+            String voteTitle,
+            String voteContent,
             List<CommentResponse.CommentDto> comments,
             List<VoteLogResponseDto> votedLogs
     ){
@@ -29,6 +31,8 @@ public class PostResponse {
                     post.getContent(),
                     null,
                     post.getPostType().type,
+                    post.getVoteTitle(),
+                    post.getVoteContent(),
                     comments,
                     votedLogs
             );

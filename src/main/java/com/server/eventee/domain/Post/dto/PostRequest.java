@@ -5,7 +5,9 @@ public class PostRequest {
     public record PostDto(
             Long groupId,
             String type,
-            String content
+            String content,
+            String voteTitle,
+            String voteContent
     ){}
 
     public record DeleteDto(
