@@ -39,8 +39,10 @@ public class Group extends BaseEntity {
     //NOTE member,event 추가해야함
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
-    @NotNull
     private Event event;
+
+    @OneToMany
+    private List<MemberGroup> memberGroups = new ArrayList<>();
 
     @Builder(toBuilder = true)
     private Group(

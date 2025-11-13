@@ -1,11 +1,15 @@
 package com.server.eventee.domain.member.model;
 
+import com.server.eventee.domain.group.model.MemberGroup;
 import com.server.eventee.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -37,6 +41,9 @@ public class Member extends BaseEntity {
     @NotNull
     @Column(name = "nickname", nullable = false, length = 50)
     private String nickname;
+
+    @OneToMany
+    private List<MemberGroup> memberGroups = new ArrayList<>();
 
     /**
      * S3 객체 key (예: profiles/1/uuid.jpg)

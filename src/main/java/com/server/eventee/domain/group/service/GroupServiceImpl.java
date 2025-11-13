@@ -1,8 +1,12 @@
 package com.server.eventee.domain.group.service;
 
+import com.server.eventee.domain.event.model.Event;
+import com.server.eventee.domain.event.repository.EventRepository;
 import com.server.eventee.domain.group.dto.*;
 import com.server.eventee.domain.group.model.Group;
+import com.server.eventee.domain.group.model.MemberGroup;
 import com.server.eventee.domain.group.repository.GroupRepository;
+import com.server.eventee.domain.group.repository.MemberGroupRepository;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.global.exception.BaseException;
 import com.server.eventee.global.exception.codes.ErrorCode;
@@ -21,9 +25,11 @@ import java.util.List;
 public class GroupServiceImpl implements GroupService{
 
     private final GroupRepository groupRepository;
+    private final EventRepository eventRepository;
+    private final MemberGroupRepository memberGroupRepository;
 
     @Transactional
-    public void createAdditionalGroup(GroupReqeust.GroupCreateDto request){
+    public void createAdditionalGroup(GroupReqeust.GroupCreateDto request,Member member){
 
         //fixme 이벤트에 현재 그룹 몇개 있는지 알아야함
         int tmpGroupCnt=0;
@@ -33,8 +39,14 @@ public class GroupServiceImpl implements GroupService{
 
         Group group = buildGroup(request, leaderName, nextNo);
         Group saved = groupRepository.save(group);
-        log.info("Group save complete");
 
+        MemberGroup memberGroup = MemberGroup.builder()
+                .member(member)
+                .group(saved)
+                .build();
+
+        memberGroupRepository.save(memberGroup);
+        log.info("Group save complete");
     }
 
     @Transactional
@@ -57,13 +69,13 @@ public class GroupServiceImpl implements GroupService{
     }
 
     @Transactional(readOnly = true)
-    public GroupResponse.ListDto getGroupByEvent(Long eventId){
-        //fixme event가져오기 , member가져오기
-        Member member = null;
+    public GroupResponse.ListDto getGroupByEvent(Long eventId,Member member){
 
+        Event event = eventRepository.findByIdAndIsDeletedFalse(eventId).orElseThrow(
+                () -> new BaseException(ErrorCode.EVENT_NOT_FOUND)
+        );
 
-        // note event에서 가져온 groups
-        List<Group> groups = new ArrayList<>();
+        List<Group> groups = event.getGroups();
 
         Group myGroup = null;
         List<Group> otherGroups = new ArrayList<>();
@@ -72,14 +84,11 @@ public class GroupServiceImpl implements GroupService{
             if(isJoin(g,member)) myGroup = g;
             else otherGroups.add(g);
         }
-
         return new GroupResponse.ListDto(myGroup,otherGroups);
-
     }
 
     @Transactional
-    public void enterGroup(Long id){
-        Member member = null;
+    public void enterGroup(Long id,Member member){
         Group group = loadGroupById(id);
 
         group.addMember(member);
@@ -87,8 +96,7 @@ public class GroupServiceImpl implements GroupService{
     }
 
     @Transactional
-    public void leaveGroup(Long id){
-        Member member = null;
+    public void leaveGroup(Long id,Member member){
         Group group = loadGroupById(id);
 
         group.leaveMember(member);
@@ -96,9 +104,7 @@ public class GroupServiceImpl implements GroupService{
     }
 
     @Transactional
-    public void moveGroup(GroupReqeust.GroupMoveDto request){
-        Member member = null;
-
+    public void moveGroup(GroupReqeust.GroupMoveDto request,Member member){
         Group beforeGroup = loadGroupById(request.beforeGroupId());
         Group afterGroup = loadGroupById(request.afterGroupId());
 
@@ -110,8 +116,11 @@ public class GroupServiceImpl implements GroupService{
     }
 
     private Boolean isJoin(Group g, Member m){
-        //fixme 그룹에 속해 있는지 판단하는 메소드 로직 수정해야함
-        return true;
+        List<MemberGroup> memberGroups = memberGroupRepository.findMemberGroupsByGroup(g);
+        for(MemberGroup mg : memberGroups){
+            if(mg.getMember().getId().equals(m.getId())) return true;
+        }
+        return false;
     }
 
 
