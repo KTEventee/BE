@@ -1,12 +1,12 @@
-package com.server.eventee.domain.post.service;
+package com.server.eventee.domain.Post.service;
 
-import com.server.eventee.domain.post.dto.PostRequest;
-import com.server.eventee.domain.post.dto.PostResponse;
-import com.server.eventee.domain.post.model.Post;
-import com.server.eventee.domain.post.model.PostType;
-import com.server.eventee.domain.post.model.VoteLog;
-import com.server.eventee.domain.post.repository.PostRepository;
-import com.server.eventee.domain.post.repository.VoteLogRepository;
+import com.server.eventee.domain.Post.dto.PostRequest;
+import com.server.eventee.domain.Post.dto.PostResponse;
+import com.server.eventee.domain.Post.model.Post;
+import com.server.eventee.domain.Post.model.PostType;
+import com.server.eventee.domain.Post.model.VoteLog;
+import com.server.eventee.domain.Post.repository.PostRepository;
+import com.server.eventee.domain.Post.repository.VoteLogRepository;
 import com.server.eventee.domain.group.model.Group;
 import com.server.eventee.domain.group.repository.GroupRepository;
 import com.server.eventee.global.exception.BaseException;
@@ -41,12 +41,12 @@ public class PostServiceImpl implements PostService{
 
         PostType postType = PostType.from(request.type());
 
-        //fixme 투표 형태일때 string 어떻게 받아올건지 정해함.
-        //요소들 어떻게든 받아옴.
         Post post = Post.builder()
                 .content(request.content())
                 .type(postType)
                 .group(group)
+                .voteTitle(request.voteTitle())
+                .voteContent(request.voteContent())
                 .build();
 
         group.addPost(post);
@@ -90,7 +90,6 @@ public class PostServiceImpl implements PostService{
                     ErrorCode.POST_TYPE_NOT_VOTE
             );
         }
-
 
         VoteLog log = VoteLog.builder()
                 .post(post)

@@ -1,6 +1,6 @@
-package com.server.eventee.domain.post.dto;
+package com.server.eventee.domain.Post.dto;
 
-import com.server.eventee.domain.post.model.VoteLog;
+import com.server.eventee.domain.Post.model.VoteLog;
 
 import java.util.List;
 

@@ -1,8 +1,10 @@
-package com.server.eventee.domain.post.model;
+package com.server.eventee.domain.Post.model;
 
-import com.server.eventee.domain.post.dto.PostRequest;
+import com.server.eventee.domain.Post.dto.PostRequest;
 import com.server.eventee.domain.comment.model.Comment;
+import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.group.model.Group;
+import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -27,17 +29,25 @@ public class Post extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postId;
 
-//    private Member wirter;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     private String content;
+    private String voteTitle = null;
+    private String voteContent = null;
+
+    @Enumerated(EnumType.STRING)
     private PostType postType;
 
     @ManyToOne
     private Group group;
 
-    @OneToMany
+    @OneToMany(mappedBy = "post")
     private List<VoteLog> voteLogs = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();;
 
     public void addComment(Comment c){
@@ -61,10 +71,14 @@ public class Post extends BaseEntity {
     }
 
     @Builder
-    public Post(String content, PostType type,Group group){
+    public Post(String content, PostType type,Group group,String voteTitle,String voteContent){
         this.content = content;
         this.postType = type;
         this.group = group;
+        if(this.postType.equals(PostType.VOTE)) {
+            this.voteTitle = voteTitle;
+            this.voteContent = voteContent;
+        }
     }
 
     public void updatePost(PostRequest.PostDto dto){

@@ -1,5 +1,6 @@
-package com.server.eventee.domain.post.model;
+package com.server.eventee.domain.Post.model;
 
+import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -20,9 +21,14 @@ public class VoteLog extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long voteLogId;
 
-//    private Member member;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     private String voteWord;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
     private Post post;
 
     @Builder

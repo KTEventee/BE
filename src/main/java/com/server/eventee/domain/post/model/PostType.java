@@ -1,4 +1,4 @@
-package com.server.eventee.domain.post.model;
+package com.server.eventee.domain.Post.model;
 
 import com.server.eventee.global.exception.BaseException;
 import com.server.eventee.global.exception.codes.ErrorCode;
