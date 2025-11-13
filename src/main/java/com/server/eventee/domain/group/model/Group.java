@@ -1,6 +1,6 @@
 package com.server.eventee.domain.group.model;
 
-import com.server.eventee.domain.Post.model.Post;
+import com.server.eventee.domain.post.model.Post;
 import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.group.dto.GroupReqeust;
 import com.server.eventee.global.entity.BaseEntity;

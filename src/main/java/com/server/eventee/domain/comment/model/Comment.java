@@ -1,8 +1,8 @@
 package com.server.eventee.domain.comment.model;
 
-import com.server.eventee.domain.Post.model.Post;
-import com.server.eventee.domain.comment.dto.CommentRequest;
 import com.server.eventee.domain.member.model.Member;
+import com.server.eventee.domain.post.model.Post;
+import com.server.eventee.domain.comment.dto.CommentRequest;
 import com.server.eventee.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -23,21 +23,21 @@ public class Comment extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentId;
 
+    //fixme 댓글 작성자
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
 
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @ManyToOne
     private Post post;
 
     @Builder
-    public Comment(String content, Post post,Member member){
+    public Comment(String content, Post post){
         this.content = content;
         this.post = post;
-        this.member = member;
     }
 
     public void updateComment(CommentRequest.CommentUpdateDto dto){

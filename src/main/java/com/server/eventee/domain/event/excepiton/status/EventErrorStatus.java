@@ -26,7 +26,12 @@ public enum EventErrorStatus implements BaseCode {
 
   // 그룹 생성 관련 오류
   GROUP_CREATE_FAILED(HttpStatus.BAD_REQUEST, "EVENT-0200", "이벤트 그룹 생성 중 오류가 발생했습니다."),
-  GROUP_COUNT_MISMATCH(HttpStatus.BAD_REQUEST, "EVENT-0201", "그룹 수가 이벤트 설정과 일치하지 않습니다.");
+  GROUP_COUNT_MISMATCH(HttpStatus.BAD_REQUEST, "EVENT-0201", "그룹 수가 이벤트 설정과 일치하지 않습니다."),
+  GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "EVENT-0202", "존재하지 않는 그룹입니다."),
+  GROUP_NOT_BELONGS_TO_EVENT(HttpStatus.BAD_REQUEST, "EVENT-0203", "해당 그룹은 지정된 이벤트에 속하지 않습니다.")
+
+
+  ;
 
   private final HttpStatus httpStatus;
   private final String code;
