@@ -83,6 +83,9 @@ public enum ErrorCode implements BaseCode {
     //common
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "COMMON-0000", "잘못된 요청입니다."),
 
+    //event
+    EVENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "EVENT-0000", "해당 이벤트 ID를 찾을 수 없습니다."),
+
     //GroupError
     GROUP_NOT_FOUND(HttpStatus.BAD_REQUEST, "GROUP-0000", "해당 ID를 가진 그룹을 찾을 수 없습니다."),
     

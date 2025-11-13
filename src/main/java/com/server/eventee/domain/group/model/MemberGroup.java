@@ -1,7 +1,6 @@
-package com.server.eventee.domain.Post.model;
+package com.server.eventee.domain.group.model;
 
 import com.server.eventee.domain.member.model.Member;
-import com.server.eventee.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,27 +12,26 @@ import org.hibernate.annotations.SQLRestriction;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "vote_log")
-@SQLDelete(sql = "UPDATE vote_log SET is_deleted = true, deleted_at = now() where id = ?")
+@Table(name = "member_group")
+@SQLDelete(sql = "UPDATE member_group SET is_deleted = true, deleted_at = now() where group_id = ?")
 @SQLRestriction("is_deleted is FALSE")
-public class VoteLog extends BaseEntity {
+public class MemberGroup {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long voteLogId;
+    private Long memberGroupId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private String voteWord;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private Post post;
+    @JoinColumn(name = "group_id")
+    private Group group;
 
     @Builder
-    public VoteLog(String word, Post post){
-        this.voteWord = word;
-        this.post = post;
+    public MemberGroup(Member member, Group group){
+        this.member = member;
+        this.group = group;
     }
 }

@@ -3,9 +3,11 @@ package com.server.eventee.domain.comment.controller;
 import com.server.eventee.domain.comment.dto.CommentRequest;
 import com.server.eventee.domain.comment.repository.CommentRepository;
 import com.server.eventee.domain.comment.service.CommentService;
+import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.global.exception.BaseException;
 import com.server.eventee.global.exception.BaseResponse;
 import com.server.eventee.global.exception.codes.ErrorCode;
+import com.server.eventee.global.filter.CurrentMember;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -32,9 +34,9 @@ public class CommentController {
     }
 
     @PostMapping
-    public BaseResponse<?> makeComment(@RequestBody CommentRequest.CommentDto request){
+    public BaseResponse<?> makeComment(@RequestBody CommentRequest.CommentDto request, @CurrentMember Member member){
         try{
-            commentService.makeComment(request);
+            commentService.makeComment(request,member);
             return BaseResponse.onSuccess("success");
         }catch(BaseException e){
             return BaseResponse.onFailure(e.getCode(),null);
