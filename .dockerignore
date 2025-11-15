@@ -1,0 +1,15 @@
+.git
+.gitignore
+
+.idea
+*.iml
+*.ipr
+*.iws
+
+.DS_Store
+
+.gradle/
+build/
+out/
+
+tmp/
