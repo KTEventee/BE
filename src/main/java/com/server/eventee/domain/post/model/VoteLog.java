@@ -1,4 +1,4 @@
-package com.server.eventee.domain.Post.model;
+package com.server.eventee.domain.post.model;
 
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.global.entity.BaseEntity;

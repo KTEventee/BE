@@ -1,12 +1,10 @@
 package com.server.eventee.domain.comment.service;
 
-import com.server.eventee.domain.Post.model.Post;
-import com.server.eventee.domain.Post.repository.PostRepository;
+import com.server.eventee.domain.post.model.Post;
+import com.server.eventee.domain.post.repository.PostRepository;
 import com.server.eventee.domain.comment.dto.CommentRequest;
 import com.server.eventee.domain.comment.model.Comment;
 import com.server.eventee.domain.comment.repository.CommentRepository;
-import com.server.eventee.domain.group.model.Group;
-import com.server.eventee.domain.group.repository.GroupRepository;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.global.exception.BaseException;
 import com.server.eventee.global.exception.codes.ErrorCode;

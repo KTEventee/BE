@@ -1,6 +1,6 @@
-package com.server.eventee.domain.Post.model;
+package com.server.eventee.domain.post.model;
 
-import com.server.eventee.domain.Post.dto.PostRequest;
+import com.server.eventee.domain.post.dto.PostRequest;
 import com.server.eventee.domain.comment.model.Comment;
 import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.group.model.Group;

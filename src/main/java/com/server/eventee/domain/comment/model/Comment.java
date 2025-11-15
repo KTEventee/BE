@@ -35,9 +35,10 @@ public class Comment extends BaseEntity {
     private Post post;
 
     @Builder
-    public Comment(String content, Post post){
+    public Comment(String content, Post post, Member member){
         this.content = content;
         this.post = post;
+        this.member = member;
     }
 
     public void updateComment(CommentRequest.CommentUpdateDto dto){
