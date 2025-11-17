@@ -56,7 +56,7 @@ public class CommentServiceImpl implements CommentService{
     }
 
     private Comment loadCommentById(long id){
-        return commentRepository.findCommentByCommentId(id).orElseThrow(
+        return commentRepository.findCommentByCommentId(    id).orElseThrow(
                 () -> new BaseException(ErrorCode.COMMENT_NOT_FOUND)
         );
     }
