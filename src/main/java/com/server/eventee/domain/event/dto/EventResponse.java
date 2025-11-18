@@ -213,5 +213,37 @@ public class EventResponse {
     ) {}
 
   }
+  @Schema(description = "초대 코드 유효성 검증 응답 DTO")
+  @Builder
+  public record InviteCodeValidateResponse(
+
+      @Schema(description = "초대 코드 유효 여부", example = "true")
+      boolean valid,
+
+      @Schema(description = "응답 메시지", example = "초대 코드가 유효합니다.")
+      String message,
+
+      @Schema(description = "이벤트 ID (유효한 경우에만 반환)", example = "15")
+      Long eventId
+  ) {}
+
+  @Schema(description = "초대 코드 + 비밀번호 검증 응답 DTO")
+  @Builder
+  public record EventPasswordVerifyResponse(
+
+      @Schema(description = "비밀번호 유효 여부", example = "true")
+      boolean valid,
+
+      @Schema(description = "이벤트 ID", example = "15")
+      Long eventId,
+
+      @Schema(description = "이벤트 제목", example = "2024 해커톤")
+      String title,
+
+      @Schema(description = "응답 메시지", example = "비밀번호가 일치합니다.")
+      String message
+  ) {}
+
+
 
 }

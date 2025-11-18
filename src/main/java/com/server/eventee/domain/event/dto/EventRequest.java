@@ -52,4 +52,18 @@ public class EventRequest {
       @NotBlank String nickname
 
   ) {}
+
+  @Schema(description = "이벤트 비밀번호 검증 요청 DTO")
+  public record PasswordVerifyRequest(
+
+      @NotBlank
+      @Schema(description = "이벤트 초대 코드", example = "ABCDEF")
+      String inviteCode,
+
+      @NotBlank
+      @Schema(description = "이벤트 비밀번호", example = "1234")
+      String password
+  ) {}
+
+
 }

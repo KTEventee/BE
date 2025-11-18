@@ -137,5 +137,39 @@ public class EventServiceImpl implements EventService {
     return eventConverter.toGroupPostsResponse(group, posts);
   }
 
+  @Transactional(readOnly = true)
+  @Override
+  public EventResponse.InviteCodeValidateResponse validateInviteCode(String code) {
+
+    Event event = eventRepository.findByInviteCode(code)
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
+
+    return new EventResponse.InviteCodeValidateResponse(
+        true,
+        "초대 코드가 유효합니다.",
+        event.getId()
+    );
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public EventResponse.EventPasswordVerifyResponse verifyEventPassword(EventRequest.PasswordVerifyRequest request) {
+
+    Event event = eventRepository.findByInviteCode(request.inviteCode())
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
+
+    if (!Objects.equals(event.getPassword(), request.password())) {
+      throw new EventHandler(EventErrorStatus.EVENT_PASSWORD_INVALID);
+    }
+
+    return EventResponse.EventPasswordVerifyResponse.builder()
+        .valid(true)
+        .eventId(event.getId())
+        .title(event.getTitle())
+        .message("비밀번호가 일치합니다.")
+        .build();
+  }
+
+
 
 }
