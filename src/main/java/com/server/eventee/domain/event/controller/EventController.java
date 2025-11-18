@@ -81,6 +81,39 @@ public class EventController {
     return BaseResponse.of(SuccessCode.SUCCESS, response);
   }
 
+  @Operation(
+      summary = "초대 코드 유효성 검증",
+      description = """
+        초대 코드만으로 이벤트 존재 여부를 확인합니다.
+        존재하면 valid=true 와 이벤트 ID를 반환합니다.
+        비밀번호 검증은 하지 않습니다.
+        """
+  )
+  @GetMapping("/validate")
+  public BaseResponse<EventResponse.InviteCodeValidateResponse> validateInviteCode(
+      @RequestParam String code
+  ) {
+    EventResponse.InviteCodeValidateResponse response = eventService.validateInviteCode(code);
+    return BaseResponse.of(SuccessCode.SUCCESS, response);
+  }
+
+  @Operation(
+      summary = "초대 코드 + 비밀번호 검증",
+      description = """
+        초대 코드와 비밀번호가 유효한지 확인합니다.
+        이벤트 입장은 처리하지 않고, 단순히 비밀번호 검증만 수행합니다.
+        이 API는 닉네임 입력 전에 비밀번호를 미리 검증하는 용도로 사용합니다.
+        """
+  )
+  @PostMapping("/verify")
+  public BaseResponse<EventResponse.EventPasswordVerifyResponse> verifyEventPassword(
+      @Valid @RequestBody EventRequest.PasswordVerifyRequest request
+  ) {
+    EventResponse.EventPasswordVerifyResponse response = eventService.verifyEventPassword(request);
+    return BaseResponse.of(SuccessCode.SUCCESS, response);
+  }
+
+
 
 
 }
