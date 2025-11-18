@@ -210,4 +210,29 @@ public class GoogleTokenService implements OAuth2TokenService {
     int visible = Math.min(6, raw.length());
     return raw.substring(0, visible) + "...(" + raw.length() + ")";
   }
+
+  public LoginResponse getTest(){
+
+    Member member = memberRepository.findBySocialId("test-social-1234").orElseGet(() ->
+            Member.builder()
+                    .socialId("test-social-1234")
+                    .role(Member.Role.USER)         // 혹은 Role.MEMBER, Role.ADMIN 등 너희 enum에 맞춰서
+                    .email("test@test.com")
+                    .nickname("테스트유저")
+                    .profileImageUrl("aaaa.com")
+                    .build()
+    );
+
+    memberRepository.save(member);
+
+    AccessToken newAccessToken = tokenProvider.generateAccessToken(member);
+    RefreshToken newRefreshToken = tokenProvider.generateRefreshToken(member);
+    TokenResponse jwtResponse = TokenResponse.of(newAccessToken, newRefreshToken);
+    return new LoginResponse(
+            member.getEmail(),
+            jwtResponse.accessToken().token(),
+            member.getSocialId(),
+            jwtResponse.refreshToken().token()
+    );
+  }
 }

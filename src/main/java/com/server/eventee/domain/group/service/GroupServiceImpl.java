@@ -1,5 +1,7 @@
 package com.server.eventee.domain.group.service;
 
+import com.server.eventee.domain.event.excepiton.EventHandler;
+import com.server.eventee.domain.event.excepiton.status.EventErrorStatus;
 import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.event.repository.EventRepository;
 import com.server.eventee.domain.group.dto.*;
@@ -29,10 +31,16 @@ public class GroupServiceImpl implements GroupService{
     private final MemberGroupRepository memberGroupRepository;
 
     @Transactional
-    public void createAdditionalGroup(GroupReqeust.GroupCreateDto request,Member member){
+    public void createAdditionalGroup(GroupReqeust.GroupCreateDto request
+//            ,Member member
+    ){
+        Member member = null;
 
-        //fixme 이벤트에 현재 그룹 몇개 있는지 알아야함
-        int tmpGroupCnt=0;
+        Event event = eventRepository.findByIdAndIsDeletedFalse(request.eventId()).orElseThrow(
+                () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
+        );
+
+        int tmpGroupCnt=event.getGroups().size();
         String leaderName = "test";
 
         int nextNo = tmpGroupCnt+1;

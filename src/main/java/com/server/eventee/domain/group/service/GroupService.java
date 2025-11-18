@@ -4,7 +4,7 @@ import com.server.eventee.domain.group.dto.*;
 import com.server.eventee.domain.member.model.Member;
 
 public interface GroupService {
-    void createAdditionalGroup(GroupReqeust.GroupCreateDto request,Member member);
+    void createAdditionalGroup(GroupReqeust.GroupCreateDto request);
     void deleteGroup(Long id);
     void updateGroup(GroupReqeust.GroupUpdateDto request);
     void updateLeader(GroupReqeust.GroupUpdateLeaderDto request);

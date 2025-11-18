@@ -39,6 +39,7 @@ public class EventConverter {
         .member(member)
         .event(event)
         .role(MemberEvent.MemberEventRole.HOST)
+            .nickname(event.getTitle()+"관리자")
         .build();
   }
 

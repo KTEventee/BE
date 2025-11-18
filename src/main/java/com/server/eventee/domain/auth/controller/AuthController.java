@@ -73,5 +73,12 @@ public class AuthController {
     return BaseResponse.of(SuccessCode.SUCCESS, "로그아웃 완료");
   }
 
+  @GetMapping("/test")
+  public BaseResponse<LoginResponse> processGoogleLogin(
+          HttpServletResponse response){
+    LoginResponse loginResponse = googleTokenService.getTest();
+    return BaseResponse.of(SuccessCode.SUCCESS, loginResponse);
+  }
+
 
 }

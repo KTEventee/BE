@@ -21,9 +21,11 @@ public class GroupController {
 
 
     @PostMapping
-    public BaseResponse<?> createAdditionalGroup(@RequestBody GroupReqeust.GroupCreateDto request,@CurrentMember Member member){
+    public BaseResponse<?> createAdditionalGroup(@RequestBody GroupReqeust.GroupCreateDto request
+//            ,@CurrentMember Member member
+    ){
         try{
-            groupService.createAdditionalGroup(request,member);
+            groupService.createAdditionalGroup(request);
             return BaseResponse.onSuccess("success");
         }catch(BaseException e){
             return BaseResponse.onFailure(e.getCode(),null);

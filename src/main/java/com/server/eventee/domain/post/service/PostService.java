@@ -7,7 +7,7 @@ public interface PostService {
 
     void makePost(PostRequest.PostDto request);
     void deletePost(long id);
-    void updatePost(PostRequest.PostDto request);
+    PostResponse.PostDto updatePost(PostRequest.PostDto request);
     PostResponse.PostListByGroupDto getPostByEvent(long evnetId);
     void vote(PostRequest.VoteDto request);
 }

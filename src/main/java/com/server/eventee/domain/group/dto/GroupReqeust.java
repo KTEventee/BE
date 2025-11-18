@@ -3,6 +3,7 @@ package com.server.eventee.domain.group.dto;
 public class GroupReqeust {
 
     public record GroupCreateDto(
+            long eventId,
             String groupName,
             String groupDescription,
             String imgUrl

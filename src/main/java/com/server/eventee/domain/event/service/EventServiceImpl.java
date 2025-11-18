@@ -17,12 +17,14 @@ import com.server.eventee.domain.post.repository.PostRepository;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventServiceImpl implements EventService {
 
   private final EventRepository eventRepository;
@@ -49,7 +51,7 @@ public class EventServiceImpl implements EventService {
         request.endAt(),
         request.teamCount()
     );
-    eventRepository.save(event);
+    event = eventRepository.save(event);
 
     MemberEvent hostRelation = eventConverter.toHostRelation(member, event);
     memberEventRepository.save(hostRelation);
