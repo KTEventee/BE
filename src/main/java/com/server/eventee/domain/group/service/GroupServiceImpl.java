@@ -84,7 +84,8 @@ public class GroupServiceImpl implements GroupService{
             if(isJoin(g,member)) myGroup = g;
             else otherGroups.add(g);
         }
-        return new GroupResponse.ListDto(myGroup,otherGroups);
+
+        return GroupResponse.ListDto.from(myGroup, otherGroups);
     }
 
     @Transactional
