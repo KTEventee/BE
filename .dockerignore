@@ -1,0 +1,17 @@
+.git
+.gitignore
+
+.idea
+*.iml
+*.ipr
+*.iws
+
+.DS_Store
+
+.gradle/
+out/
+
+tmp/
+
+build/*
+!build/libs/
