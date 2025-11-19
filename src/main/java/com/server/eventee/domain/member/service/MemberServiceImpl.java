@@ -43,7 +43,8 @@ public class MemberServiceImpl implements MemberService {
   private final S3Props props;
 
   private static final Pattern KEY_PATTERN =
-      Pattern.compile("^[a-z0-9\\-/]+\\.(jpg|jpeg|png|webp)$");
+      Pattern.compile("^profiles/[0-9]+/[A-Za-z0-9\\-]+\\.(jpg|jpeg|png|webp)$");
+
 
   // 닉네임 중복 확인 및 변경
   @Override
@@ -261,10 +262,18 @@ public class MemberServiceImpl implements MemberService {
 
   private void ensureKeyOwnedByMember(Member member, String key) {
     String expectedPrefix = props.getKeyPrefix() + member.getId() + "/";
-    if (!key.startsWith(expectedPrefix) || !KEY_PATTERN.matcher(key).matches()) {
+
+    if (!key.startsWith(expectedPrefix)) {
+      log.error("[Key Prefix 불일치] expectedPrefix={}, key={}", expectedPrefix, key);
+      throw new MemberHandler(MemberErrorStatus.MEMBER_IMAGE_INVALID_KEY);
+    }
+
+    if (!KEY_PATTERN.matcher(key).matches()) {
+      log.error("[Key Pattern 불일치] key={}", key);
       throw new MemberHandler(MemberErrorStatus.MEMBER_IMAGE_INVALID_KEY);
     }
   }
+
 
   private String mapExt(String contentType) {
     return switch (contentType) {
