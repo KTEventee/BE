@@ -48,7 +48,7 @@ public class Post extends BaseEntity {
     private List<VoteLog> voteLogs = new ArrayList<>();
 
     @OneToMany(mappedBy = "post")
-    private List<Comment> comments = new ArrayList<>();;
+    private List<Comment> comments = new ArrayList<>();
 
     public void addComment(Comment c){
         if(comments.contains(c)) return;

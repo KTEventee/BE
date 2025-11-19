@@ -26,14 +26,17 @@ public class VoteLog extends BaseEntity {
     private Member member;
 
     private String voteWord;
+    private int voteNum;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
 
     @Builder
-    public VoteLog(String word, Post post){
+    public VoteLog(String word, Post post,Member member,int voteNum){
         this.voteWord = word;
         this.post = post;
+        this.member = member;
+        this.voteNum = voteNum;
     }
 }

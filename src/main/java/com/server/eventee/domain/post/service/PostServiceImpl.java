@@ -7,6 +7,7 @@ import com.server.eventee.domain.event.repository.EventRepository;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.post.dto.PostRequest;
 import com.server.eventee.domain.post.dto.PostResponse;
+import com.server.eventee.domain.post.dto.VoteLogResponseDto;
 import com.server.eventee.domain.post.model.Post;
 import com.server.eventee.domain.post.model.PostType;
 import com.server.eventee.domain.post.model.VoteLog;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @RequiredArgsConstructor
@@ -87,7 +89,7 @@ public class PostServiceImpl implements PostService{
         return PostResponse.PostListByGroupDto.from(groups,member);
     }
 
-    public void vote(PostRequest.VoteDto request,Member member){
+    public VoteLogResponseDto vote(PostRequest.VoteDto request,Member member){
         Post post = loadPostById(request.postId());
 
         if(!post.getPostType().equals(PostType.VOTE)){
@@ -96,8 +98,18 @@ public class PostServiceImpl implements PostService{
             );
         }
 
+        Optional<VoteLog> checkLog = voteLogRepository.findVoteLogByMemberAndPost(member,post);
+        if(checkLog.isPresent()) throw new BaseException(ErrorCode.VOTE_ALREADY_DO);
+
+        String[] options = post.getVoteContent().split("_");
+        int num=0;
+        for(int i=0;i< options.length;i++){
+            if(options[i].equals(request.voteText())) num=i+1;
+        }
         VoteLog log = VoteLog.builder()
                 .post(post)
+                .member(member)
+                .voteNum(num)
                 .word(request.voteText())
                 .build();
 
@@ -105,6 +117,8 @@ public class PostServiceImpl implements PostService{
 
         voteLogRepository.save(log);
         postRepository.save(post);
+
+        return VoteLogResponseDto.from(post.getVoteLogs(),member);
     }
 
 

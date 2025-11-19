@@ -3,6 +3,7 @@ package com.server.eventee.domain.post.service;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.post.dto.PostRequest;
 import com.server.eventee.domain.post.dto.PostResponse;
+import com.server.eventee.domain.post.dto.VoteLogResponseDto;
 
 public interface PostService {
 
@@ -10,5 +11,5 @@ public interface PostService {
     void deletePost(long id);
     PostResponse.PostDto updatePost(PostRequest.PostDto request,Member member);
     PostResponse.PostListByGroupDto getPostByEvent(long eventId,Member member);
-    void vote(PostRequest.VoteDto request,Member member);
+    VoteLogResponseDto vote(PostRequest.VoteDto request, Member member);
 }

@@ -18,15 +18,17 @@ public class PostResponse {
             String voteTitle,
             String voteContent,
             List<CommentResponse.CommentDto> comments,
-            List<VoteLogResponseDto> votedLogs,
+            VoteLogResponseDto votedLogs,
             boolean isWrite
     ){
         public static PostDto from(Post post, Member member){
             List<CommentResponse.CommentDto> comments=new ArrayList<>();
-            List<VoteLogResponseDto> votedLogs=new ArrayList<>();
+            VoteLogResponseDto votedLogs= null;
             String writer = post.getMember().getNickname();
+
             if(post.getPostType().equals(PostType.TEXT)) comments = CommentResponse.CommentDto.from(post.getComments(),member);
-            else if(post.getPostType().equals(PostType.VOTE)) votedLogs = VoteLogResponseDto.from(post.getVoteLogs());
+            else if(post.getPostType().equals(PostType.VOTE)) votedLogs = VoteLogResponseDto.from(post.getVoteLogs(),member);
+
             return new PostDto(
                     post.getPostId(),
                     post.getContent(),

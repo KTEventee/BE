@@ -65,6 +65,7 @@ public enum ErrorCode implements BaseCode {
     POST_NOT_FOUND(HttpStatus.BAD_REQUEST,"POST-0000","게시글을 찾을 수 없음"),
     POST_TYPE_NOT_VALID(HttpStatus.BAD_REQUEST, "POST-0001", "해당 타입은 존재하지 않는 타입입니다."),
     POST_TYPE_NOT_VOTE(HttpStatus.BAD_REQUEST, "POST-0001", "해당 타입은 투표용 게시글이 아닙니다."),
+    VOTE_ALREADY_DO(HttpStatus.BAD_REQUEST, "POST-0002", "해당 투표는 이미 진행하였습니다."),
 
     //댓글 에러
     COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT-0000", "해당 댓글을 찾을 수 없습니다."),
