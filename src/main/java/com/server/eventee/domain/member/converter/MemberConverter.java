@@ -12,16 +12,24 @@ import java.util.List;
 public class MemberConverter {
 
   public MemberMyPageResponse toResponse(Member member, List<Event> joinedEvents) {
+
     List<MemberMyPageResponse.JoinedEvent> joinedEventDtos = joinedEvents.stream()
         .map(this::toJoinedEvent)
         .toList();
 
+    // 안전 처리된 프로필 이미지 URL
+    String profileImageUrl = member.getProfileImageUrl();
+    if (profileImageUrl != null && profileImageUrl.isBlank()) {
+      profileImageUrl = null;
+    }
+
     return MemberMyPageResponse.builder()
         .nickname(member.getNickname())
-        .profileImageUrl(member.getProfileImageUrl())
+        .profileImageUrl(profileImageUrl)
         .joinedEvents(joinedEventDtos)
         .build();
   }
+
 
   private MemberMyPageResponse.JoinedEvent toJoinedEvent(Event event) {
     List<String> participantImages = event.getMemberEvents().stream()
