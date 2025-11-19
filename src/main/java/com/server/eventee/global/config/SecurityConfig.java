@@ -44,8 +44,10 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/v3/**", "/swagger-ui.html", "/swagger-ui/**",
                     "/swagger-resources/**", "/api-test/**",
-                    "/api/v1/auth/**", "/actuator/**"
+                    "/api/v1/auth/**", "/actuator/**",
+                    "https://api.eventee.cloud/api/v1/auth/google/**"
                 ).permitAll()
+                .requestMatchers("/api/v1/auth/logout").authenticated()
                 .anyRequest().authenticated()
             )
             .securityContext(context ->

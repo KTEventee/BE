@@ -69,14 +69,13 @@ public class AuthController {
   )
   @PostMapping("/logout")
   public BaseResponse<String> logout(
-      @CurrentMember Member member,
       @CookieValue(value = "refreshToken", required = false) String refreshToken,
       HttpServletResponse response
   ) {
 
-    googleTokenService.logout(member, refreshToken);
+    googleTokenService.logout(refreshToken);
 
-    jakarta.servlet.http.Cookie cookie = new Cookie("refreshToken", null);
+    Cookie cookie = new Cookie("refreshToken", null);
     cookie.setHttpOnly(true);
     cookie.setSecure(true);
     cookie.setPath("/");
@@ -85,6 +84,7 @@ public class AuthController {
 
     return BaseResponse.of(SuccessCode.SUCCESS, "로그아웃 완료");
   }
+
 
   @GetMapping("/test")
   public BaseResponse<LoginResponse> processGoogleLogin(
