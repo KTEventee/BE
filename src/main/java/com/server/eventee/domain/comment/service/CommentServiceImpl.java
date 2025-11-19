@@ -28,7 +28,7 @@ public class CommentServiceImpl implements CommentService{
         Post post = loadPostById(request.postId());
 
         Comment comment = Comment.builder()
-                .content(request.contnet())
+                .content(request.content())
                 .post(post)
                 .member(member)
                 .build();
@@ -38,8 +38,8 @@ public class CommentServiceImpl implements CommentService{
     }
 
     @Transactional
-    public void deleteComment(long id){
-        Comment comment = loadCommentById(id);
+    public void deleteComment(long commentId){
+        Comment comment = loadCommentById(commentId);
 
         Post post = comment.getPost();
         post.deleteComment(comment);
@@ -56,7 +56,7 @@ public class CommentServiceImpl implements CommentService{
     }
 
     private Comment loadCommentById(long id){
-        return commentRepository.findCommentByCommentId(    id).orElseThrow(
+        return commentRepository.findCommentByCommentId(id).orElseThrow(
                 () -> new BaseException(ErrorCode.COMMENT_NOT_FOUND)
         );
     }

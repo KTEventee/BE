@@ -22,7 +22,7 @@ public class GroupController {
 
     @PostMapping
     public BaseResponse<?> createAdditionalGroup(@RequestBody GroupReqeust.GroupCreateDto request
-//            ,@CurrentMember Member member
+            ,@CurrentMember Member member
     ){
         try{
             groupService.createAdditionalGroup(request);

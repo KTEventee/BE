@@ -1,10 +1,13 @@
 package com.server.eventee.domain.post.controller;
 
+import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.post.dto.PostRequest;
+import com.server.eventee.domain.post.dto.PostResponse;
 import com.server.eventee.domain.post.service.PostService;
 import com.server.eventee.global.exception.BaseException;
 import com.server.eventee.global.exception.BaseResponse;
 import com.server.eventee.global.exception.codes.ErrorCode;
+import com.server.eventee.global.filter.CurrentMember;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +23,9 @@ public class PostController {
 
     //NOTE 투표는 요소1_요소2_요소3 같은 형태로 받기
     @PostMapping
-    public BaseResponse<?> makePost(@RequestBody PostRequest.PostDto request){
+    public BaseResponse<?> makePost(@RequestBody PostRequest.PostDto request, @CurrentMember Member member){
         try{
-            postService.makePost(request);
+            postService.makePost(request,member);
             return BaseResponse.onSuccess("success");
         }catch(BaseException e){
             return BaseResponse.onFailure(e.getCode(),null);
@@ -46,9 +49,9 @@ public class PostController {
     }
 
     @PatchMapping
-    public BaseResponse<?> updatePost(@RequestBody PostRequest.PostDto request){
+    public BaseResponse<?> updatePost(@RequestBody PostRequest.PostDto request,@CurrentMember Member member){
         try{
-            postService.updatePost(request);
+            postService.updatePost(request,member);
             return BaseResponse.onSuccess("success");
         }catch(BaseException e){
             return BaseResponse.onFailure(e.getCode(),null);
@@ -58,11 +61,12 @@ public class PostController {
         }
     }
 
-    @GetMapping("/{evnetId}")
-    public BaseResponse<?> getPostByEvent(@PathVariable Long evnetId){
+    @GetMapping("/{eventId}")
+    public BaseResponse<?> getPostByEvent(@PathVariable Long eventId,@CurrentMember Member member){
         try{
-            postService.getPostByEvent(evnetId);
-            return BaseResponse.onSuccess("success");
+            PostResponse.PostListByGroupDto response = postService.getPostByEvent(eventId,member);
+            log.info("response:{}",response);
+            return BaseResponse.onSuccess(response);
         }catch(BaseException e){
             return BaseResponse.onFailure(e.getCode(),null);
         }catch (Exception e){
@@ -72,9 +76,9 @@ public class PostController {
     }
 
     @PostMapping("/vote")
-    public BaseResponse<?> vote(@RequestBody PostRequest.VoteDto request){
+    public BaseResponse<?> vote(@RequestBody PostRequest.VoteDto request, @CurrentMember Member member){
         try{
-            postService.vote(request);
+            postService.vote(request,member);
             return BaseResponse.onSuccess("success");
         }catch(BaseException e){
             return BaseResponse.onFailure(e.getCode(),null);

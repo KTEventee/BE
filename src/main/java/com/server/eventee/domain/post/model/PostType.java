@@ -9,7 +9,7 @@ import java.util.Arrays;
 @Getter
 public enum PostType {
     TEXT("TEXT"),
-    VOTE("VOTD");
+    VOTE("VOTE");
 
     public String type;
 

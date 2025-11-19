@@ -89,8 +89,9 @@ public class GroupServiceImpl implements GroupService{
         List<Group> otherGroups = new ArrayList<>();
 
         for(Group g : groups){
-            if(isJoin(g,member)) myGroup = g;
-            else otherGroups.add(g);
+//            if(isJoin(g,member)) myGroup = g;
+//            else otherGroups.add(g);
+            otherGroups.add(g);
         }
 
         return GroupResponse.ListDto.from(myGroup, otherGroups);

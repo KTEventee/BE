@@ -1,5 +1,10 @@
 package com.server.eventee.domain.post.service;
 
+import com.server.eventee.domain.event.excepiton.EventHandler;
+import com.server.eventee.domain.event.excepiton.status.EventErrorStatus;
+import com.server.eventee.domain.event.model.Event;
+import com.server.eventee.domain.event.repository.EventRepository;
+import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.post.dto.PostRequest;
 import com.server.eventee.domain.post.dto.PostResponse;
 import com.server.eventee.domain.post.model.Post;
@@ -28,14 +33,10 @@ public class PostServiceImpl implements PostService{
     private final PostRepository postRepository;
     private final GroupRepository groupRepository;
     private final VoteLogRepository voteLogRepository;
-
-    /*
-        fixme 전체적인 수정사항
-            그룹이랑 연결해줘야함.
-     */
+    private final EventRepository eventRepository;
 
     @Transactional
-    public void makePost(PostRequest.PostDto request){
+    public void makePost(PostRequest.PostDto request, Member member){
         Group group = groupRepository.findGroupByGroupId(request.groupId())
                 .orElseThrow(() -> new BaseException(ErrorCode.GROUP_NOT_FOUND));
 
@@ -45,12 +46,12 @@ public class PostServiceImpl implements PostService{
                 .content(request.content())
                 .type(postType)
                 .group(group)
+                .member(member)
                 .voteTitle(request.voteTitle())
                 .voteContent(request.voteContent())
                 .build();
 
         group.addPost(post);
-        groupRepository.save(group);
         postRepository.save(post);
     }
 
@@ -65,10 +66,10 @@ public class PostServiceImpl implements PostService{
     }
 
     @Transactional
-    public PostResponse.PostDto updatePost(PostRequest.PostDto request){
+    public PostResponse.PostDto updatePost(PostRequest.PostDto request,Member member){
         Post post = loadPostById(request.groupId());
         post.updatePost(request);
-        return PostResponse.PostDto.from(postRepository.save(post));
+        return PostResponse.PostDto.from(postRepository.save(post),member);
     }
 
     private Post loadPostById(long id){
@@ -77,12 +78,16 @@ public class PostServiceImpl implements PostService{
         );
     }
 
-    public PostResponse.PostListByGroupDto getPostByEvent(long evnetId){
-        List<Group> groups = new ArrayList<>();
-        return PostResponse.PostListByGroupDto.from(groups);
+    public PostResponse.PostListByGroupDto getPostByEvent(long eventId,Member member){
+        Event event = eventRepository.findByIdAndIsDeletedFalse(eventId).orElseThrow(
+                () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
+        );
+        List<Group> groups = event.getGroups();
+        log.info("groups:{}",groups.toString());
+        return PostResponse.PostListByGroupDto.from(groups,member);
     }
 
-    public void vote(PostRequest.VoteDto request){
+    public void vote(PostRequest.VoteDto request,Member member){
         Post post = loadPostById(request.postId());
 
         if(!post.getPostType().equals(PostType.VOTE)){

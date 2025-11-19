@@ -27,6 +27,7 @@ public class GroupResponse {
             String groupLeader //초기에는 Null값임
     ){
         public static GroupDto from(Group group){
+            if(group == null) return null;
             return new GroupDto(
                     group.getGroupId(),
                     group.getGroupName(),

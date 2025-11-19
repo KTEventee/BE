@@ -16,11 +16,12 @@ import org.hibernate.annotations.SQLRestriction;
 @Getter
 @Entity
 @Table(name = "comment")
-@SQLDelete(sql = "UPDATE comment SET is_deleted = true, deleted_at = now() where id = ?")
+@SQLDelete(sql = "UPDATE comment SET is_deleted = true, deleted_at = now() where comment_id = ?")
 @SQLRestriction("is_deleted is FALSE")
 public class Comment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "comment_id")
     private Long commentId;
 
     //fixme 댓글 작성자
@@ -40,6 +41,6 @@ public class Comment extends BaseEntity {
     }
 
     public void updateComment(CommentRequest.CommentUpdateDto dto){
-        this.content = dto.contnet();
+        this.content = dto.content();
     }
 }

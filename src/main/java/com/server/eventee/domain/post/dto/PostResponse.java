@@ -1,5 +1,6 @@
 package com.server.eventee.domain.post.dto;
 
+import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.post.model.Post;
 import com.server.eventee.domain.post.model.PostType;
 import com.server.eventee.domain.comment.dto.CommentResponse;
@@ -17,29 +18,31 @@ public class PostResponse {
             String voteTitle,
             String voteContent,
             List<CommentResponse.CommentDto> comments,
-            List<VoteLogResponseDto> votedLogs
+            List<VoteLogResponseDto> votedLogs,
+            boolean isWrite
     ){
-        public static PostDto from(Post post){
+        public static PostDto from(Post post, Member member){
             List<CommentResponse.CommentDto> comments=new ArrayList<>();
             List<VoteLogResponseDto> votedLogs=new ArrayList<>();
-
-            if(post.getPostType().equals(PostType.TEXT)) comments = CommentResponse.CommentDto.from(post.getComments());
+            String writer = post.getMember().getNickname();
+            if(post.getPostType().equals(PostType.TEXT)) comments = CommentResponse.CommentDto.from(post.getComments(),member);
             else if(post.getPostType().equals(PostType.VOTE)) votedLogs = VoteLogResponseDto.from(post.getVoteLogs());
             return new PostDto(
                     post.getPostId(),
                     post.getContent(),
-                    null,
-                    post.getPostType().type,
+                    writer,
+                    post.getPostType().type.toLowerCase(),
                     post.getVoteTitle(),
                     post.getVoteContent(),
                     comments,
-                    votedLogs
+                    votedLogs,
+                    member.getNickname().equals(writer)
             );
         }
 
-        public List<PostDto> from(List<Post> posts){
+        public static List<PostDto> from(List<Post> posts, Member member) {
             return posts.stream()
-                    .map(PostDto::from)
+                    .map(post -> PostDto.from(post, member)) // 🔥 member 전달
                     .toList();
         }
     }
@@ -48,12 +51,10 @@ public class PostResponse {
             int groupNum,
             List<PostDto> posts
     ){
-        public static PostListDto from(Group g){
+        public static PostListDto from(Group g,Member member){
             return new PostListDto(
                     g.getGroupNo(),
-                    g.getPosts().stream().map(
-                            PostDto::from
-                    ).toList()
+                    g.getPosts().stream().map(post -> PostDto.from(post, member)).toList()
             );
         }
     }
@@ -61,10 +62,10 @@ public class PostResponse {
     public record PostListByGroupDto(
             List<PostListDto> lists
     ){
-        public static PostListByGroupDto from(List<Group> groups){
+        public static PostListByGroupDto from(List<Group> groups,Member member){
             List<PostListDto> listDtos = new ArrayList<>();
             for(Group g : groups){
-                listDtos.add(PostListDto.from(g));
+                listDtos.add(PostListDto.from(g,member));
             }
             return new PostListByGroupDto(listDtos);
         }

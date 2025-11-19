@@ -5,6 +5,6 @@ import com.server.eventee.domain.member.model.Member;
 
 public interface CommentService {
     void makeComment(CommentRequest.CommentDto request, Member member);
-    void deleteComment(long id);
+    void deleteComment(long commentId);
     void updateComment(CommentRequest.CommentUpdateDto request);
 }

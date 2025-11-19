@@ -71,9 +71,10 @@ public class Post extends BaseEntity {
     }
 
     @Builder
-    public Post(String content, PostType type,Group group,String voteTitle,String voteContent){
+    public Post(String content, PostType type,Group group,String voteTitle,String voteContent,Member member){
         this.content = content;
         this.postType = type;
+        this.member = member;
         this.group = group;
         if(this.postType.equals(PostType.VOTE)) {
             this.voteTitle = voteTitle;

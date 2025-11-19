@@ -46,10 +46,10 @@ public class CommentController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public BaseResponse<?> deleteComment(@PathVariable long id){
+    @DeleteMapping("/{commentId}")
+    public BaseResponse<?> deleteComment(@PathVariable long commentId){
         try{
-            commentService.deleteComment(id);
+            commentService.deleteComment(commentId);
             return BaseResponse.onSuccess("success");
         }catch(BaseException e){
             return BaseResponse.onFailure(e.getCode(),null);
