@@ -1,6 +1,5 @@
 package com.server.eventee.global.token;
 
-import com.server.eventee.domain.member.dto.MemberDetails;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.member.service.MemberDetailsService;
 import com.server.eventee.global.exception.BaseException;
@@ -49,6 +48,8 @@ public class JwtProvider implements TokenProvider {
             .build();
     }
 
+
+    @Override
     public AccessToken generateAccessToken(Member member) {
         if (member.getEmail() == null) {
             throw new BaseException(ErrorCode.MEMBER_NOT_FOUND);
@@ -59,6 +60,7 @@ public class JwtProvider implements TokenProvider {
 
         String token = Jwts.builder()
             .claim("type", "access")
+            .claim("socialId", member.getSocialId())   // 필요하다면 추가 (선택)
             .issuer(ISSUER)
             .audience().add(member.getEmail()).and()
             .issuedAt(now)
@@ -70,12 +72,15 @@ public class JwtProvider implements TokenProvider {
         return AccessToken.of(token);
     }
 
+
+    @Override
     public RefreshToken generateRefreshToken(Member member) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_TIME);
 
         String token = Jwts.builder()
             .claim("type", "refresh")
+            .claim("socialId", member.getSocialId())  // ★ refresh token에서 socialId 추출 가능하도록 추가
             .issuer(ISSUER)
             .audience().add(member.getEmail()).and()
             .issuedAt(now)
@@ -87,6 +92,27 @@ public class JwtProvider implements TokenProvider {
         return RefreshToken.of(token);
     }
 
+
+    @Override
+    public String getSocialIdFromRefreshToken(String refreshToken) {
+        Claims claims = parseClaims(refreshToken);
+        return claims.get("socialId", String.class);
+    }
+
+
+    public Claims parseClaims(String token) {
+        try {
+            return jwtParser.parseSignedClaims(token).getPayload();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims(); // 만료여도 claims 읽기 허용
+        } catch (JwtException e) {
+            log.warn("[JWT] Invalid token: {}", e.getMessage());
+            throw new BaseException(ErrorCode.INVALID_TOKEN);
+        }
+    }
+
+
+    @Override
     public void validateTokenOrThrow(String token) {
         try {
             jwtParser.parseSignedClaims(token);
@@ -97,6 +123,8 @@ public class JwtProvider implements TokenProvider {
         }
     }
 
+
+    @Override
     public Authentication getAuthentication(String token) {
         String email = parseAudience(token);
         UserDetails userDetails = memberDetailsService.loadUserByUsername(email);
@@ -125,6 +153,8 @@ public class JwtProvider implements TokenProvider {
         }
     }
 
+
+    @Override
     public String resolveAccessToken(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -144,6 +174,7 @@ public class JwtProvider implements TokenProvider {
         return null;
     }
 
+    @Override
     public String resolveRefreshToken(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {

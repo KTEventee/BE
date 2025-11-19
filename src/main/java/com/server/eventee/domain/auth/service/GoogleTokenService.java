@@ -110,46 +110,54 @@ public class GoogleTokenService implements OAuth2TokenService {
   // 로그아웃 처리 (Refresh Token 무효화)
   @Override
   @Transactional
-  public void logout(Member member, String refreshToken) {
+  public void logout(String refreshToken) {
+
     if (refreshToken == null || refreshToken.isBlank()) {
-      log.warn("[로그아웃 실패] 쿠키에 Refresh Token 없음 - memberId={}, socialId={}",
-          member.getId(), mask(member.getSocialId()));
+      log.warn("[로그아웃 실패] 쿠키에 Refresh Token 없음");
       throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_REFRESH_TOKEN_MISSING);
     }
 
     try {
-      String redisKey = REFRESH_TOKEN_PREFIX + member.getSocialId();
-      String storedToken = redisTemplate.opsForValue().get(redisKey);
+      // 1) Refresh Token에서 socialId 추출 (TokenProvider 사용)
+      String socialId = tokenProvider.getSocialIdFromRefreshToken(refreshToken);
 
-      // Redis 저장 토큰 존재 여부 확인
-      if (storedToken == null) {
-        log.warn("[로그아웃 실패] Redis에 저장된 RT 없음 - memberId={}, key={}",
-            member.getId(), redisKey);
-        throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_TOKEN_NOT_FOUND_IN_REDIS);
-      }
-
-      // 요청 토큰과 Redis 토큰 불일치 시
-      if (!storedToken.equals(refreshToken)) {
-        log.warn("[로그아웃 실패] RT 불일치 - memberId={}, 요청RT={}, 저장RT={}",
-            member.getId(), mask(refreshToken), mask(storedToken));
+      if (socialId == null) {
+        log.warn("[로그아웃 실패] Refresh Token 에 socialId 없음");
         throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_TOKEN_MISMATCH);
       }
 
-      // Redis에서 RT 삭제
+      // 2) Redis Key 생성
+      String redisKey = REFRESH_TOKEN_PREFIX + socialId;
+
+      String storedToken = redisTemplate.opsForValue().get(redisKey);
+
+      // 3) Redis 저장 토큰 존재 여부 확인
+      if (storedToken == null) {
+        log.warn("[로그아웃 실패] Redis에 저장된 RT 없음 - key={}", redisKey);
+        throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_TOKEN_NOT_FOUND_IN_REDIS);
+      }
+
+      // 4) 요청 토큰과 Redis 토큰 불일치 시
+      if (!storedToken.equals(refreshToken)) {
+        log.warn("[로그아웃 실패] RT 불일치 - 요청RT={}, 저장RT={}",
+            mask(refreshToken), mask(storedToken));
+        throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_TOKEN_MISMATCH);
+      }
+
+      // 5) Redis에서 RT 삭제
       Boolean result = redisTemplate.delete(redisKey);
       if (Boolean.FALSE.equals(result)) {
-        log.error("[로그아웃 실패] Redis 키 삭제 실패 - memberId={}, key={}", member.getId(), redisKey);
+        log.error("[로그아웃 실패] Redis 키 삭제 실패 - key={}", redisKey);
         throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_REDIS_DELETE_FAILED);
       }
 
-      log.info("[로그아웃 성공] memberId={}, socialId={}, key={} 삭제 완료",
-          member.getId(), mask(member.getSocialId()), redisKey);
+      log.info("[로그아웃 성공] socialId={}, redisKey={} 삭제 완료",
+          mask(socialId), redisKey);
 
     } catch (MemberHandler e) {
       throw e;
     } catch (Exception e) {
-      log.error("[로그아웃 예외 발생] memberId={}, socialId={}, error={}",
-          member.getId(), mask(member.getSocialId()), e.getMessage(), e);
+      log.error("[로그아웃 예외 발생] error={}", e.getMessage(), e);
       throw new MemberHandler(MemberErrorStatus.MEMBER_LOGOUT_UNKNOWN_ERROR);
     }
   }
@@ -211,16 +219,16 @@ public class GoogleTokenService implements OAuth2TokenService {
     return raw.substring(0, visible) + "...(" + raw.length() + ")";
   }
 
-  public LoginResponse getTest(){
+  public LoginResponse getTest() {
 
     Member member = memberRepository.findBySocialId("test-social-1234").orElseGet(() ->
-            Member.builder()
-                    .socialId("test-social-1234")
-                    .role(Member.Role.USER)         // 혹은 Role.MEMBER, Role.ADMIN 등 너희 enum에 맞춰서
-                    .email("test@test.com")
-                    .nickname("테스트유저")
-                    .profileImageUrl("aaaa.com")
-                    .build()
+        Member.builder()
+            .socialId("test-social-1234")
+            .role(Member.Role.USER)
+            .email("test@test.com")
+            .nickname("테스트유저")
+            .profileImageUrl("aaaa.com")
+            .build()
     );
 
     memberRepository.save(member);
@@ -229,10 +237,10 @@ public class GoogleTokenService implements OAuth2TokenService {
     RefreshToken newRefreshToken = tokenProvider.generateRefreshToken(member);
     TokenResponse jwtResponse = TokenResponse.of(newAccessToken, newRefreshToken);
     return new LoginResponse(
-            member.getEmail(),
-            jwtResponse.accessToken().token(),
-            member.getSocialId(),
-            jwtResponse.refreshToken().token()
+        member.getEmail(),
+        jwtResponse.accessToken().token(),
+        member.getSocialId(),
+        jwtResponse.refreshToken().token()
     );
   }
 }

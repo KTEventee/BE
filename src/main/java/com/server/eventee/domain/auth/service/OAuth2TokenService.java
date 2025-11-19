@@ -11,7 +11,7 @@ public interface OAuth2TokenService {
   OAuthAttributes getUserInfo(String accessToken);
 
   LoginResponse handleLogin(String code);
-  void logout(Member member, String refreshToken);
+  void logout(String refreshToken);
 
 
 }

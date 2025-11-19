@@ -47,6 +47,7 @@ public class SecurityConfig {
                     "/api/v1/auth/**", "/actuator/**",
                     "https://api.eventee.cloud/api/v1/auth/google/**"
                 ).permitAll()
+                .requestMatchers("/api/v1/auth/logout").authenticated()
                 .anyRequest().authenticated()
             )
             .securityContext(context ->
