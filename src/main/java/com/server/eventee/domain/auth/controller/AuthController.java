@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -31,10 +32,12 @@ public class AuthController {
   private final CookieHelper cookieHelper;
 
   @Operation(summary = "구글 로그인", description = "구글 OAuth 인증 코드로 로그인 처리 및 JWT 토큰 발급")
-  @GetMapping(value = "/google", produces = "application/json")
-  public BaseResponse<LoginResponse> processGoogleLogin(
+  @GetMapping("/google")
+  public void processGoogleLogin(
       @RequestParam("code") String code,
-      HttpServletResponse response) {
+      @RequestParam("state") String state,
+      HttpServletResponse response
+  ) throws IOException {
 
     LoginResponse loginResponse = googleTokenService.handleLogin(code);
 
@@ -43,8 +46,18 @@ public class AuthController {
         loginResponse.refreshToken()
     );
     response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-    return BaseResponse.of(SuccessCode.SUCCESS, loginResponse);
+
+    // 프론트엔드로 리다이렉트
+    String redirectUrl = "https://www.eventee.cloud/oauth/callback/google/success"
+//    String redirectUrl = "http://localhost:3000/oauth/callback/google/success"
+        + "?accessToken=" + loginResponse.accessToken()
+        + "&email=" + loginResponse.email()
+        + "&socialId=" + loginResponse.socialId()
+        + "&state=" + state;
+
+    response.sendRedirect(redirectUrl);
   }
+
 
   // 로그아웃
   @Operation(
