@@ -49,7 +49,7 @@ public class AuthController {
 
     // 프론트엔드로 리다이렉트
     String redirectUrl = "https://www.eventee.cloud/oauth/callback/google/success"
-//    String redirectUrl = "htts://localhost:3000/oauth/callback/google/success"
+//    String redirectUrl = "http://localhost:3000/oauth/callback/google/success"
         + "?accessToken=" + loginResponse.accessToken()
         + "&email=" + loginResponse.email()
         + "&socialId=" + loginResponse.socialId()
