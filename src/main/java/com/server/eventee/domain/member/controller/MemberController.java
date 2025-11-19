@@ -8,10 +8,7 @@ import com.server.eventee.global.exception.BaseResponse;
 import com.server.eventee.global.exception.codes.SuccessCode;
 import com.server.eventee.global.filter.CurrentMember;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -51,19 +48,7 @@ public class MemberController {
       description = """
           S3에 직접 PUT 업로드할 URL을 발급합니다.
           프론트는 해당 URL로 이미지를 업로드한 뒤 /confirm을 호출해야 합니다.
-          """,
-      requestBody = @RequestBody(
-          required = true,
-          content = @Content(
-              schema = @Schema(implementation = MemberProfileImageDto.UploadIntentRequest.class),
-              examples = @ExampleObject(value = """
-                  {
-                    "contentType": "image/jpeg",
-                    "contentLength": 524288
-                  }
-                  """)
-          )
-      )
+          """
   )
   @PostMapping("/profile-image/presigned-url")
   public BaseResponse<MemberProfileImageDto.PresignedUrlResponse> createPresignedUrl(

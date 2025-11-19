@@ -31,7 +31,11 @@ public enum MemberErrorStatus implements BaseCode {
   MEMBER_LOGOUT_TOKEN_NOT_FOUND_IN_REDIS(HttpStatus.BAD_REQUEST, "MEMBER-0201", "Redis에 저장된 Refresh Token이 존재하지 않습니다."),
   MEMBER_LOGOUT_TOKEN_MISMATCH(HttpStatus.UNAUTHORIZED, "MEMBER-0202", "요청한 Refresh Token이 서버에 저장된 값과 일치하지 않습니다."),
   MEMBER_LOGOUT_REDIS_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER-0203", "Redis에서 Refresh Token 삭제 중 오류가 발생했습니다."),
-  MEMBER_LOGOUT_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER-0204", "로그아웃 처리 중 알 수 없는 오류가 발생했습니다.");
+  MEMBER_LOGOUT_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER-0204", "로그아웃 처리 중 알 수 없는 오류가 발생했습니다."),
+  MEMBER_IMAGE_PRESIGNED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER-0105", "Presigned URL 생성 중 오류가 발생했습니다."),
+  MEMBER_IMAGE_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "MEMBER-0106", "이미지 업로드 요청 데이터가 유효하지 않습니다.");
+
+
 
   private final HttpStatus httpStatus;
   private final String code;
