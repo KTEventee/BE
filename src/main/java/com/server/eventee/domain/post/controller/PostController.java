@@ -78,8 +78,7 @@ public class PostController {
     @PostMapping("/vote")
     public BaseResponse<?> vote(@RequestBody PostRequest.VoteDto request, @CurrentMember Member member){
         try{
-            postService.vote(request,member);
-            return BaseResponse.onSuccess("success");
+            return BaseResponse.onSuccess(postService.vote(request,member));
         }catch(BaseException e){
             return BaseResponse.onFailure(e.getCode(),null);
         }catch (Exception e){
