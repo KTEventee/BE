@@ -25,9 +25,6 @@ public class EventConverter {
   private static final String DEFAULT_GROUP_IMAGE =
       "https://eventee-bucket.s3.ap-northeast-2.amazonaws.com/group/defaultGroupImage.png";
 
-  // ======================================================
-  // EVENT ENTITY 생성
-  // ======================================================
   public Event toEvent(String inviteCode, String title, String description,
       String password, LocalDateTime startAt, LocalDateTime endAt, Integer teamCount) {
 
@@ -44,9 +41,6 @@ public class EventConverter {
         .build();
   }
 
-  // ======================================================
-  // HOST MemberEvent 생성
-  // ======================================================
   public MemberEvent toHostRelation(Member member, Event event) {
     return MemberEvent.builder()
         .member(member)
@@ -56,9 +50,6 @@ public class EventConverter {
         .build();
   }
 
-  // ======================================================
-  // 그룹 생성
-  // ======================================================
   public Group toGroup(int groupNo, Member leader, Event event) {
     return Group.builder()
         .groupName("팀 " + groupNo + "조")
@@ -70,9 +61,6 @@ public class EventConverter {
         .build();
   }
 
-  // ======================================================
-  // 이벤트 생성 응답 DTO
-  // ======================================================
   public EventResponse.CreateResponse toCreateResponse(Event event, Member member) {
     String inviteUrl = "https://eventee.site/invite/" + event.getInviteCode();
 
@@ -94,9 +82,6 @@ public class EventConverter {
         .build();
   }
 
-  // ======================================================
-  // 이벤트 + 그룹 목록 응답 DTO
-  // ======================================================
   public EventResponse.EventWithGroupsResponse toEventWithGroupsResponse(Event event, List<Group> groups) {
 
     List<EventResponse.EventWithGroupsResponse.GroupSummary> groupDtos =
@@ -123,14 +108,11 @@ public class EventConverter {
         .build();
   }
 
-  // ======================================================
-  // ⭐ 핵심: 그룹별 포스트 + 투표 응답 DTO
-  // ======================================================
-  public EventResponse.GroupPostsResponse toGroupPostsResponse(Group group, List<Post> posts) {
+  public EventResponse.GroupPostsResponse toGroupPostsResponse(Group group, List<Post> posts, Member member) {
 
     List<EventResponse.GroupPostsResponse.PostInfo> postInfos =
         posts.stream()
-            .map(this::convertPostToDto)
+            .map(post -> convertPostToDto(post, member))
             .toList();
 
     return EventResponse.GroupPostsResponse.builder()
@@ -140,23 +122,17 @@ public class EventConverter {
         .build();
   }
 
-  // ======================================================
-  // ⭐ Post → PostInfo 변환
-  // ======================================================
-  private EventResponse.GroupPostsResponse.PostInfo convertPostToDto(Post post) {
+  private EventResponse.GroupPostsResponse.PostInfo convertPostToDto(Post post, Member currentUser) {
 
-    // 댓글 변환
+    boolean isMinePost = post.getMember().getId().equals(currentUser.getId());
+
     List<EventResponse.GroupPostsResponse.CommentInfo> comments =
-        convertComments(post.getComments());
+        convertComments(post.getComments(), currentUser);
 
-    // 기본값
     String pollQuestion = null;
     List<EventResponse.GroupPostsResponse.VoteOptionInfo> pollOptions = null;
     Integer userVote = null;
 
-    // ------------------------
-    // ⭐ 투표 타입이면 poll 정보 생성
-    // ------------------------
     if (post.getPostType() == PostType.VOTE) {
 
       pollQuestion = post.getVoteTitle();
@@ -181,7 +157,7 @@ public class EventConverter {
         int percent = totalVotes > 0 ? (votes * 100 / totalVotes) : 0;
 
         boolean isMine = logs.stream()
-            .anyMatch(v -> v.getMember().getId().equals(post.getMember().getId())
+            .anyMatch(v -> v.getMember().getId().equals(currentUser.getId())
                 && v.getVoteNum() == optionNo);
 
         pollOptions.add(
@@ -195,9 +171,8 @@ public class EventConverter {
         );
       }
 
-      // 사용자가 선택한 옵션
       userVote = logs.stream()
-          .filter(v -> v.getMember().getId().equals(post.getMember().getId()))
+          .filter(v -> v.getMember().getId().equals(currentUser.getId()))
           .map(VoteLog::getVoteNum)
           .findFirst()
           .orElse(null);
@@ -213,13 +188,14 @@ public class EventConverter {
         .pollQuestion(pollQuestion)
         .pollOptions(pollOptions)
         .userVote(userVote)
+        .isMine(isMinePost)
         .build();
   }
 
-  // ======================================================
-  // 댓글 변환
-  // ======================================================
-  private List<EventResponse.GroupPostsResponse.CommentInfo> convertComments(List<Comment> comments) {
+  private List<EventResponse.GroupPostsResponse.CommentInfo> convertComments(
+      List<Comment> comments,
+      Member currentUser
+  ) {
     return comments.stream()
         .map(c -> EventResponse.GroupPostsResponse.CommentInfo.builder()
             .commentId(c.getCommentId())
@@ -227,13 +203,11 @@ public class EventConverter {
             .writerNickname(c.getMember().getNickname())
             .writerProfileUrl(c.getMember().getProfileImageUrl())
             .createdAt(c.getCreatedAt())
+            .isMine(c.getMember().getId().equals(currentUser.getId()))
             .build())
         .toList();
   }
 
-  // ======================================================
-  // 이벤트 입장 응답 DTO
-  // ======================================================
   public EventResponse.JoinResponse toJoinResponse(Event event, MemberEvent memberEvent) {
 
     List<EventResponse.JoinResponse.GroupInfo> groupInfos =
