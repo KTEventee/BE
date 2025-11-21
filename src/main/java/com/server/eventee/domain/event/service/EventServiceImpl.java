@@ -37,9 +37,7 @@ public class EventServiceImpl implements EventService {
   private final PostRepository postRepository;
   private final EventConverter eventConverter;
 
-  // ======================================================
   // 🎉 이벤트 생성
-  // ======================================================
   @Transactional
   @Override
   public EventResponse.CreateResponse createEvent(Member member, EventRequest.CreateRequest request) {
@@ -77,9 +75,7 @@ public class EventServiceImpl implements EventService {
     return eventConverter.toCreateResponse(event, member);
   }
 
-  // ======================================================
   // 🎟️ 이벤트 입장
-  // ======================================================
   @Transactional
   @Override
   public EventResponse.JoinResponse joinEvent(Member member, EventRequest.JoinRequest request) {
@@ -113,9 +109,7 @@ public class EventServiceImpl implements EventService {
     return eventConverter.toJoinResponse(event, memberEvent);
   }
 
-  // ======================================================
   // 📌 이벤트 + 그룹 목록 조회
-  // ======================================================
   @Transactional(readOnly = true)
   @Override
   public EventResponse.EventWithGroupsResponse getEventGroups(Member member, Long eventId) {
@@ -135,9 +129,7 @@ public class EventServiceImpl implements EventService {
     return eventConverter.toEventWithGroupsResponse(event, groups);
   }
 
-  // ======================================================
   // 📝 그룹별 게시글 + 투표 조회
-  // ======================================================
   @Transactional(readOnly = true)
   @Override
   public EventResponse.GroupPostsResponse getGroupPosts(Member member, Long eventId, Long groupId) {
@@ -162,12 +154,10 @@ public class EventServiceImpl implements EventService {
     List<Post> posts = postRepository.findAllByGroupAndIsDeletedFalse(group);
 
     // 🔥 투표 옵션/퍼센트/댓글/author 모두 포함한 DTO 변환
-    return eventConverter.toGroupPostsResponse(group, posts);
+    return eventConverter.toGroupPostsResponse(group, posts, member);
   }
 
-  // ======================================================
   // 🔍 초대 코드 유효성 검증
-  // ======================================================
   @Transactional(readOnly = true)
   @Override
   public EventResponse.InviteCodeValidateResponse validateInviteCode(String code) {
@@ -182,9 +172,7 @@ public class EventServiceImpl implements EventService {
     );
   }
 
-  // ======================================================
   // 🔐 초대 코드 + 패스워드 검증
-  // ======================================================
   @Transactional(readOnly = true)
   @Override
   public EventResponse.EventPasswordVerifyResponse verifyEventPassword(EventRequest.PasswordVerifyRequest request) {

@@ -21,7 +21,7 @@ import java.util.List;
 @Getter
 @Entity
 @Table(name = "post")
-@SQLDelete(sql = "UPDATE post SET is_deleted = true, deleted_at = now() where id = ?")
+@SQLDelete(sql = "UPDATE post SET is_deleted = true, deleted_at = now() WHERE post_id = ?")
 @SQLRestriction("is_deleted is FALSE")
 public class Post extends BaseEntity {
 
