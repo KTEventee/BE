@@ -44,13 +44,16 @@ public class MemberMyPageResponse {
     private String thumbnailUrl;
 
     @Schema(description = "이벤트 초대 코드", example = "ABCD12")
-    private String inviteCode;     // ⭐ 추가
+    private String inviteCode;
+
+    @Schema(description = "이벤트 역할", example = "HOST")
+    private String role;
 
     @Schema(description = "이벤트 시작일시", example = "2025-10-25T15:00:00")
-    private LocalDateTime startAt; // ⭐ 추가
+    private LocalDateTime startAt;
 
     @Schema(description = "이벤트 종료일시", example = "2025-10-25T18:00:00")
-    private LocalDateTime endAt;   // ⭐ 추가
+    private LocalDateTime endAt;
 
     @Schema(description = "참여 인원 수")
     private int participantsCount;
