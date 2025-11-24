@@ -116,11 +116,25 @@ public class EventController {
     return BaseResponse.of(SuccessCode.SUCCESS, response);
   }
 
+
+  @Operation(
+          summary = "이벤트 멤버 가져오기",
+          description = """
+                    해당 이벤트에 존재하는 사용자들
+                    모두 불러오기
+                    """
+  )
   @GetMapping("/admin/members")
   public BaseResponse<List<MemberListDto.MemberDto>> getMembers(@RequestParam Long eventId){
     return BaseResponse.onSuccess(eventService.getMembersByEvent(eventId));
   }
 
+  @Operation(
+          summary = "사용자 강퇴",
+          description = """
+                    사용자 강퇴하는 기능
+                    """
+  )
   @PostMapping("/admin/ban")
   public BaseResponse<String> kickMember(@RequestBody EventRequest.KickMemberRequest request){
     eventService.kickMember(request);
