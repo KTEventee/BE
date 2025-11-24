@@ -13,7 +13,10 @@ import com.server.eventee.domain.event.repository.EventRepository;
 import com.server.eventee.domain.event.repository.MemberEventRepository;
 import com.server.eventee.domain.group.model.Group;
 import com.server.eventee.domain.group.repository.GroupRepository;
+import com.server.eventee.domain.member.exception.MemberHandler;
+import com.server.eventee.domain.member.exception.status.MemberErrorStatus;
 import com.server.eventee.domain.member.model.Member;
+import com.server.eventee.domain.member.repository.MemberRepository;
 import com.server.eventee.domain.post.model.Post;
 import com.server.eventee.domain.post.repository.PostRepository;
 
@@ -39,6 +42,7 @@ public class EventServiceImpl implements EventService {
   private final GroupRepository groupRepository;
   private final PostRepository postRepository;
   private final EventConverter eventConverter;
+  private final MemberRepository memberRepository;
 
   // 🎉 이벤트 생성
   @Transactional
@@ -195,6 +199,7 @@ public class EventServiceImpl implements EventService {
         .build();
   }
 
+  @Transactional(readOnly = true)
   public List<MemberListDto.MemberDto> getMembersByEvent(long eventId){
     Event event = eventRepository.findByIdAndIsDeletedFalse(eventId).orElseThrow(
             () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
@@ -204,5 +209,20 @@ public class EventServiceImpl implements EventService {
             .map(m -> MemberListDto.MemberDto.from(m.getMember()))
             .toList();
     return  members;
+  }
+
+  @Transactional
+  public void kickMember(EventRequest.KickMemberRequest request){
+    Member member = memberRepository.findById(request.memberId()).orElseThrow(
+            () -> new MemberHandler(MemberErrorStatus.MEMBER_NOT_FOUND)
+    );
+    Event event = eventRepository.findByIdAndIsDeletedFalse(request.eventId()).orElseThrow(
+            () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
+    );
+
+    MemberEvent me = memberEventRepository.findByMemberAndEventAndIsDeletedFalse(member,event).orElseThrow(
+            () -> new EventHandler(EventErrorStatus.EVENT_MEMBER_NOT_FOUND)
+    );
+    memberEventRepository.delete(me);
   }
 }
