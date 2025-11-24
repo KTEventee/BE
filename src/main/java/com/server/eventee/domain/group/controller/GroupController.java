@@ -1,6 +1,7 @@
 package com.server.eventee.domain.group.controller;
 
 import com.server.eventee.domain.group.dto.GroupReqeust;
+import com.server.eventee.domain.group.dto.GroupResponse;
 import com.server.eventee.domain.group.service.GroupService;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.global.exception.BaseException;
@@ -21,7 +22,7 @@ public class GroupController {
 
 
     @PostMapping
-    public BaseResponse<?> createAdditionalGroup(@RequestBody GroupReqeust.GroupCreateDto request
+    public BaseResponse<String> createAdditionalGroup(@RequestBody GroupReqeust.GroupCreateDto request
             ,@CurrentMember Member member
     ){
         try{
@@ -36,7 +37,7 @@ public class GroupController {
     }
 
     @PostMapping("/enter/{id}")
-    public BaseResponse<?> enterGroup(@PathVariable long id, @CurrentMember Member member){
+    public BaseResponse<String> enterGroup(@PathVariable long id, @CurrentMember Member member){
         try{
             groupService.enterGroup(id,member);
             return BaseResponse.onSuccess("success");
@@ -49,7 +50,7 @@ public class GroupController {
     }
 
     @PostMapping("/leave/{id}")
-    public BaseResponse<?> leaveGroup(@PathVariable long id,@CurrentMember Member member){
+    public BaseResponse<String> leaveGroup(@PathVariable long id,@CurrentMember Member member){
         try{
             groupService.leaveGroup(id,member);
             return BaseResponse.onSuccess("success");
@@ -62,7 +63,7 @@ public class GroupController {
     }
 
     @PostMapping("/move")
-    public BaseResponse<?> moveGroup(@RequestBody GroupReqeust.GroupMoveDto request,@CurrentMember Member member){
+    public BaseResponse<String> moveGroup(@RequestBody GroupReqeust.GroupMoveDto request,@CurrentMember Member member){
         try{
             groupService.moveGroup(request,member);
             return BaseResponse.onSuccess("success");
@@ -75,7 +76,7 @@ public class GroupController {
     }
 
     @PutMapping
-    public BaseResponse<?> updateGroup(@PathVariable GroupReqeust.GroupUpdateDto request){
+    public BaseResponse<String> updateGroup(@PathVariable GroupReqeust.GroupUpdateDto request){
         try{
             groupService.updateGroup(request);
             return BaseResponse.onSuccess("success");
@@ -88,7 +89,7 @@ public class GroupController {
     }
 
     @PatchMapping("/leader")
-    public BaseResponse<?> updateGroupLeader(@RequestBody GroupReqeust.GroupUpdateLeaderDto request){
+    public BaseResponse<String> updateGroupLeader(@RequestBody GroupReqeust.GroupUpdateLeaderDto request){
         try{
             groupService.updateLeader(request);
             return BaseResponse.onSuccess("success");
@@ -101,7 +102,7 @@ public class GroupController {
     }
 
     @DeleteMapping("/{id}")
-    public BaseResponse<?> deleteGroup(@PathVariable Long id){
+    public BaseResponse<String> deleteGroup(@PathVariable Long id){
         try{
             groupService.deleteGroup(id);
             return BaseResponse.onSuccess("success");
@@ -114,7 +115,7 @@ public class GroupController {
     }
 
     @GetMapping("/{eventId}")
-    public BaseResponse<?> getGroupByEvent(@PathVariable Long eventId,@CurrentMember Member member){
+    public BaseResponse<GroupResponse.ListDto> getGroupByEvent(@PathVariable Long eventId, @CurrentMember Member member){
         try{
             return BaseResponse.onSuccess(groupService.getGroupByEvent(eventId,member));
         }catch(BaseException e){
