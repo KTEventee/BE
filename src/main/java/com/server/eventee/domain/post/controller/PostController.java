@@ -125,4 +125,18 @@ public class PostController {
             return BaseResponse.onFailure(ErrorCode.BAD_REQUEST,null);
         }
     }
+
+    @Operation(
+            summary = "관리자 게시글 등록",
+            description = """
+                    게시하고 싶은 게시글 정보와 함께
+                    조 번호를 보내주면 
+                    모든 조에게 동일한 게시글을 올림.
+                    """
+    )
+    @PostMapping("/admin")
+    public BaseResponse<?> adminPost(@RequestBody PostRequest.AdminPostDto request,@CurrentMember Member member){
+        adminPost(request, member);
+        return BaseResponse.onSuccess("success");
+    }
 }

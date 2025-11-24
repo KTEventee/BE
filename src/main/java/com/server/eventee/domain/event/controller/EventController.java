@@ -2,6 +2,7 @@ package com.server.eventee.domain.event.controller;
 
 import com.server.eventee.domain.event.dto.EventRequest;
 import com.server.eventee.domain.event.dto.EventResponse;
+import com.server.eventee.domain.event.dto.MemberListDto;
 import com.server.eventee.domain.event.service.EventService;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.global.exception.BaseResponse;
@@ -13,6 +14,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Event", description = "이벤트 생성 및 입장 관련 API")
 @RestController
@@ -114,6 +117,28 @@ public class EventController {
   }
 
 
+  @Operation(
+          summary = "이벤트 멤버 가져오기",
+          description = """
+                    해당 이벤트에 존재하는 사용자들
+                    모두 불러오기
+                    """
+  )
+  @GetMapping("/admin/members")
+  public BaseResponse<List<MemberListDto.MemberDto>> getMembers(@RequestParam Long eventId){
+    return BaseResponse.onSuccess(eventService.getMembersByEvent(eventId));
+  }
 
+  @Operation(
+          summary = "사용자 강퇴",
+          description = """
+                    사용자 강퇴하는 기능
+                    """
+  )
+  @PostMapping("/admin/ban")
+  public BaseResponse<String> kickMember(@RequestBody EventRequest.KickMemberRequest request){
+    eventService.kickMember(request);
+    return BaseResponse.onSuccess("success");
+  }
 
 }

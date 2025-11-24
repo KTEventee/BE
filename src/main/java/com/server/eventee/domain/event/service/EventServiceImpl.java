@@ -3,6 +3,7 @@ package com.server.eventee.domain.event.service;
 import com.server.eventee.domain.event.converter.EventConverter;
 import com.server.eventee.domain.event.dto.EventRequest;
 import com.server.eventee.domain.event.dto.EventResponse;
+import com.server.eventee.domain.event.dto.MemberListDto;
 import com.server.eventee.domain.event.excepiton.EventHandler;
 import com.server.eventee.domain.event.excepiton.status.EventErrorStatus;
 import com.server.eventee.domain.event.model.Event;
@@ -12,13 +13,18 @@ import com.server.eventee.domain.event.repository.EventRepository;
 import com.server.eventee.domain.event.repository.MemberEventRepository;
 import com.server.eventee.domain.group.model.Group;
 import com.server.eventee.domain.group.repository.GroupRepository;
+import com.server.eventee.domain.member.exception.MemberHandler;
+import com.server.eventee.domain.member.exception.status.MemberErrorStatus;
 import com.server.eventee.domain.member.model.Member;
+import com.server.eventee.domain.member.repository.MemberRepository;
 import com.server.eventee.domain.post.model.Post;
 import com.server.eventee.domain.post.repository.PostRepository;
 
 import java.util.List;
 import java.util.Objects;
 
+import com.server.eventee.global.exception.BaseException;
+import com.server.eventee.global.exception.codes.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,6 +42,7 @@ public class EventServiceImpl implements EventService {
   private final GroupRepository groupRepository;
   private final PostRepository postRepository;
   private final EventConverter eventConverter;
+  private final MemberRepository memberRepository;
 
   // 🎉 이벤트 생성
   @Transactional
@@ -190,5 +197,32 @@ public class EventServiceImpl implements EventService {
         .title(event.getTitle())
         .message("비밀번호가 일치합니다.")
         .build();
+  }
+
+  @Transactional(readOnly = true)
+  public List<MemberListDto.MemberDto> getMembersByEvent(long eventId){
+    Event event = eventRepository.findByIdAndIsDeletedFalse(eventId).orElseThrow(
+            () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
+    );
+    List<MemberEvent> me = memberEventRepository.findMemberEventsByEventAndIsDeletedFalse(event);
+    List<MemberListDto.MemberDto> members = me.stream()
+            .map(m -> MemberListDto.MemberDto.from(m.getMember()))
+            .toList();
+    return  members;
+  }
+
+  @Transactional
+  public void kickMember(EventRequest.KickMemberRequest request){
+    Member member = memberRepository.findById(request.memberId()).orElseThrow(
+            () -> new MemberHandler(MemberErrorStatus.MEMBER_NOT_FOUND)
+    );
+    Event event = eventRepository.findByIdAndIsDeletedFalse(request.eventId()).orElseThrow(
+            () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
+    );
+
+    MemberEvent me = memberEventRepository.findByMemberAndEventAndIsDeletedFalse(member,event).orElseThrow(
+            () -> new EventHandler(EventErrorStatus.EVENT_MEMBER_NOT_FOUND)
+    );
+    memberEventRepository.delete(me);
   }
 }

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ public class PostServiceImpl implements PostService{
     @Transactional
     public void makePost(PostRequest.PostDto request, Member member){
         Group group = groupRepository.findGroupByGroupId(request.groupId())
-                .orElseThrow(() -> new BaseException(ErrorCode.GROUP_NOT_FOUND));
+                        .orElseThrow(() -> new BaseException(ErrorCode.GROUP_NOT_FOUND));
 
         PostType postType = PostType.from(request.type());
 
@@ -121,5 +122,28 @@ public class PostServiceImpl implements PostService{
         return VoteLogResponseDto.from(post.getVoteLogs(),member);
     }
 
+    @Transactional
+    public void adminPost(PostRequest.AdminPostDto request,Member member){
+        List<Long> groupIds = Arrays.stream(request.groupNums().split("_")).map(
+                Long::parseLong
+        ).toList();
+        List<Group> groups = groupRepository.findByGroupIdIn(groupIds);
 
+        PostType postType = PostType.from(request.type());
+
+        List<Post> posts = new ArrayList<>();
+        groups.forEach(g ->{
+                Post post =Post.builder()
+                        .content(request.content())
+                        .type(postType)
+                        .group(g)
+                        .member(member)
+                        .voteTitle(request.voteTitle())
+                        .voteContent(request.voteContent())
+                        .build();
+                posts.add(post);
+                g.addPost(post);
+        });
+        postRepository.saveAll(posts);
+    }
 }

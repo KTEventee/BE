@@ -17,4 +17,5 @@ public interface MemberEventRepository extends JpaRepository<MemberEvent, Long> 
   boolean existsByMemberAndEventAndIsDeletedFalse(Member member, Event event);
 
   Optional<MemberEvent> findByMemberAndEventAndIsDeletedFalse(Member member, Event event);
+  List<MemberEvent> findMemberEventsByEventAndIsDeletedFalse(Event event);
 }

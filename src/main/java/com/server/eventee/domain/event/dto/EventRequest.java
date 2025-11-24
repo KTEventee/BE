@@ -65,5 +65,9 @@ public class EventRequest {
       String password
   ) {}
 
+    public record KickMemberRequest(
+            long eventId,
+            long memberId
+    ){}
 
 }
