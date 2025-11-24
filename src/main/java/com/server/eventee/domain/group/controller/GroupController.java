@@ -21,7 +21,7 @@ public class GroupController {
     private final GroupService groupService;
 
 
-    @PostMapping
+    @PostMapping("/admin")
     public BaseResponse<String> createAdditionalGroup(@RequestBody GroupReqeust.GroupCreateDto request
             ,@CurrentMember Member member
     ){

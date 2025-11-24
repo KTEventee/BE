@@ -125,4 +125,10 @@ public class PostController {
             return BaseResponse.onFailure(ErrorCode.BAD_REQUEST,null);
         }
     }
+
+    @PostMapping("/admin")
+    public BaseResponse<?> adminPost(@RequestBody PostRequest.AdminPostDto request,@CurrentMember Member member){
+        adminPost(request, member);
+        return BaseResponse.onSuccess("success");
+    }
 }
