@@ -113,7 +113,10 @@ public class EventController {
     return BaseResponse.of(SuccessCode.SUCCESS, response);
   }
 
-
+  @GetMapping("/admin/members")
+  public BaseResponse<?> getMembers(@RequestParam Long eventId){
+    return BaseResponse.onSuccess(eventService.getMembersByEvent(eventId));
+  }
 
 
 }

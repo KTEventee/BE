@@ -4,6 +4,7 @@ import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.event.model.MemberEvent;
 import com.server.eventee.domain.event.repository.MemberEventRepository;
 import com.server.eventee.domain.member.converter.MemberConverter;
+import com.server.eventee.domain.event.dto.MemberListDto;
 import com.server.eventee.domain.member.dto.MemberMyPageResponse;
 import com.server.eventee.domain.member.dto.MemberProfileImageDto.*;
 import com.server.eventee.domain.member.exception.MemberHandler;
@@ -16,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
@@ -304,4 +304,5 @@ public class MemberServiceImpl implements MemberService {
   private String buildPublicUrl(String key) {
     return "https://" + props.getBucket() + ".s3." + props.getRegion() + ".amazonaws.com/" + key;
   }
+
 }
