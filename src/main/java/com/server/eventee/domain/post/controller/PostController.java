@@ -3,6 +3,7 @@ package com.server.eventee.domain.post.controller;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.post.dto.PostRequest;
 import com.server.eventee.domain.post.dto.PostResponse;
+import com.server.eventee.domain.post.dto.VoteLogResponseDto;
 import com.server.eventee.domain.post.service.PostService;
 import com.server.eventee.global.exception.BaseException;
 import com.server.eventee.global.exception.BaseResponse;
@@ -32,7 +33,7 @@ public class PostController {
                     """
     )
     @PostMapping
-    public BaseResponse<?> makePost(@RequestBody PostRequest.PostDto request, @CurrentMember Member member){
+    public BaseResponse<String> makePost(@RequestBody PostRequest.PostDto request, @CurrentMember Member member){
         try{
             postService.makePost(request,member);
             return BaseResponse.onSuccess("success");
@@ -52,7 +53,7 @@ public class PostController {
                     """
     )
     @DeleteMapping("/{id}")
-    public BaseResponse<?> deletePost(@PathVariable long id){
+    public BaseResponse<String> deletePost(@PathVariable long id){
         try{
             postService.deletePost(id);
             return BaseResponse.onSuccess("success");
@@ -72,7 +73,7 @@ public class PostController {
                     """
     )
     @PatchMapping
-    public BaseResponse<?> updatePost(@RequestBody PostRequest.PostDto request,@CurrentMember Member member){
+    public BaseResponse<String> updatePost(@RequestBody PostRequest.PostDto request,@CurrentMember Member member){
         try{
             postService.updatePost(request,member);
             return BaseResponse.onSuccess("success");
@@ -92,7 +93,7 @@ public class PostController {
                     """
     )
     @GetMapping("/{eventId}")
-    public BaseResponse<?> getPostByEvent(@PathVariable Long eventId,@CurrentMember Member member){
+    public BaseResponse<PostResponse.PostListByGroupDto> getPostByEvent(@PathVariable Long eventId,@CurrentMember Member member){
         try{
             PostResponse.PostListByGroupDto response = postService.getPostByEvent(eventId,member);
             log.info("response:{}",response);
@@ -114,7 +115,7 @@ public class PostController {
                     """
     )
     @PostMapping("/vote")
-    public BaseResponse<?> vote(@RequestBody PostRequest.VoteDto request, @CurrentMember Member member){
+    public BaseResponse<VoteLogResponseDto> vote(@RequestBody PostRequest.VoteDto request, @CurrentMember Member member){
         try{
             return BaseResponse.onSuccess(postService.vote(request,member));
         }catch(BaseException e){
