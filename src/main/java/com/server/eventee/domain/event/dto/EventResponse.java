@@ -64,6 +64,7 @@ public class EventResponse {
       @Schema(description = "이벤트 ID") Long eventId,
       @Schema(description = "이벤트 제목") String eventTitle,
       @Schema(description = "이벤트 설명") String eventDescription,
+      @Schema(description = "현 사용자의 역할") String eventRole,
       @Schema(description = "썸네일 URL") String thumbnailUrl,
       @Schema(description = "시작일") LocalDateTime startAt,
       @Schema(description = "종료일") LocalDateTime endAt,
@@ -83,7 +84,7 @@ public class EventResponse {
     ) {}
   }
 
-  // 🗳️ 4. 그룹별 포스트 / 투표 응답
+  //  4. 그룹별 포스트 / 투표 응답
   @Schema(description = "그룹별 포스트 및 투표 조회 응답 DTO")
   @Builder
   public record GroupPostsResponse(
@@ -92,7 +93,7 @@ public class EventResponse {
       @Schema(description = "게시글 리스트") List<PostInfo> posts
   ) {
 
-    // 📝 포스트 정보
+    // 포스트 정보
     @Builder
     @Schema(description = "포스트 정보 DTO")
     public record PostInfo(

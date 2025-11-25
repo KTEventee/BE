@@ -44,7 +44,7 @@ public class EventServiceImpl implements EventService {
   private final EventConverter eventConverter;
   private final MemberRepository memberRepository;
 
-  // 🎉 이벤트 생성
+  // 이벤트 생성
   @Transactional
   @Override
   public EventResponse.CreateResponse createEvent(Member member, EventRequest.CreateRequest request) {
@@ -82,7 +82,7 @@ public class EventServiceImpl implements EventService {
     return eventConverter.toCreateResponse(event, member);
   }
 
-  // 🎟️ 이벤트 입장
+  // 이벤트 입장
   @Transactional
   @Override
   public EventResponse.JoinResponse joinEvent(Member member, EventRequest.JoinRequest request) {
@@ -116,13 +116,19 @@ public class EventServiceImpl implements EventService {
     return eventConverter.toJoinResponse(event, memberEvent);
   }
 
-  // 📌 이벤트 + 그룹 목록 조회
+  // 이벤트 + 그룹 목록 조회
   @Transactional(readOnly = true)
   @Override
   public EventResponse.EventWithGroupsResponse getEventGroups(Member member, Long eventId) {
 
     Event event = eventRepository.findById(eventId)
         .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
+
+    MemberEvent memberEvent = memberEventRepository
+        .findByMemberAndEventAndIsDeletedFalse(member, event)
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_ACCESS_DENIED));
+
+    MemberEventRole role = memberEvent.getRole();
 
     boolean isParticipant =
         memberEventRepository.existsByMemberAndEventAndIsDeletedFalse(member, event);
@@ -133,10 +139,10 @@ public class EventServiceImpl implements EventService {
 
     List<Group> groups = groupRepository.findAllByEventId(eventId);
 
-    return eventConverter.toEventWithGroupsResponse(event, groups);
+    return eventConverter.toEventWithGroupsResponse(event, groups, role);
   }
 
-  // 📝 그룹별 게시글 + 투표 조회
+  // 그룹별 게시글 + 투표 조회
   @Transactional(readOnly = true)
   @Override
   public EventResponse.GroupPostsResponse getGroupPosts(Member member, Long eventId, Long groupId) {
