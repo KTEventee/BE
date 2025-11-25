@@ -73,7 +73,7 @@ public class PostController {
                     """
     )
     @PatchMapping
-    public BaseResponse<PostResponse.PostDto> updatePost(@RequestBody PostRequest.PostDto request,@CurrentMember Member member){
+    public BaseResponse<PostResponse.PostDto> updatePost(@RequestBody PostRequest.UpdateDTo request,@CurrentMember Member member){
         try{
             return BaseResponse.onSuccess(postService.updatePost(request,member));
         }catch(BaseException e){
