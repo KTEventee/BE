@@ -69,8 +69,8 @@ public class PostServiceImpl implements PostService{
     }
 
     @Transactional
-    public PostResponse.PostDto updatePost(PostRequest.PostDto request,Member member){
-        Post post = loadPostById(request.groupId());
+    public PostResponse.PostDto updatePost(PostRequest.UpdateDTo request,Member member){
+        Post post = loadPostById(request.postId());
         post.updatePost(request);
         return PostResponse.PostDto.from(postRepository.save(post),member);
     }

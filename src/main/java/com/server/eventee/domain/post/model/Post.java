@@ -82,9 +82,13 @@ public class Post extends BaseEntity {
         }
     }
 
-    public void updatePost(PostRequest.PostDto dto){
+    public void updatePost(PostRequest.UpdateDTo dto){
         this.content = dto.content();
         this.postType = PostType.from(dto.type());
+        if(dto.type().equalsIgnoreCase(PostType.VOTE.type)){
+            this.voteTitle = dto.voteTitle();
+            this.voteContent = dto.voteContent();
+        }
     }
 
 
