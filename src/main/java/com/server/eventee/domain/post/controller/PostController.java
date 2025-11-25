@@ -73,10 +73,9 @@ public class PostController {
                     """
     )
     @PatchMapping
-    public BaseResponse<String> updatePost(@RequestBody PostRequest.PostDto request,@CurrentMember Member member){
+    public BaseResponse<PostResponse.PostDto> updatePost(@RequestBody PostRequest.PostDto request,@CurrentMember Member member){
         try{
-            postService.updatePost(request,member);
-            return BaseResponse.onSuccess("success");
+            return BaseResponse.onSuccess(postService.updatePost(request,member));
         }catch(BaseException e){
             return BaseResponse.onFailure(e.getCode(),null);
         }catch (Exception e){

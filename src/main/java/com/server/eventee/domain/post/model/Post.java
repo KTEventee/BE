@@ -83,7 +83,7 @@ public class Post extends BaseEntity {
     }
 
     public void updatePost(PostRequest.PostDto dto){
-        this.content = content;
+        this.content = dto.content();
         this.postType = PostType.from(dto.type());
     }
 

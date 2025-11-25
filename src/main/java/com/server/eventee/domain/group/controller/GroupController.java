@@ -36,7 +36,7 @@ public class GroupController {
             ,@CurrentMember Member member
     ){
         try{
-            groupService.createAdditionalGroup(request);
+            groupService.createAdditionalGroup(request,member);
             return BaseResponse.onSuccess("success");
         }catch(BaseException e){
             return BaseResponse.onFailure(e.getCode(),null);
@@ -112,7 +112,7 @@ public class GroupController {
                     """
     )
     @PutMapping
-    public BaseResponse<String> updateGroup(@PathVariable GroupReqeust.GroupUpdateDto request){
+    public BaseResponse<String> updateGroup(@RequestBody GroupReqeust.GroupUpdateDto request){
         try{
             groupService.updateGroup(request);
             return BaseResponse.onSuccess("success");

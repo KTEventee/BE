@@ -32,9 +32,8 @@ public class GroupServiceImpl implements GroupService{
 
     @Transactional
     public void createAdditionalGroup(GroupReqeust.GroupCreateDto request
-//            ,Member member
+            ,Member member
     ){
-        Member member = null;
 
         Event event = eventRepository.findByIdAndIsDeletedFalse(request.eventId()).orElseThrow(
                 () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
