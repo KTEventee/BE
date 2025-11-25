@@ -123,4 +123,27 @@ public class EventController {
     logResponse("success");
     return BaseResponse.onSuccess("success");
   }
+
+  @Operation(summary = "관리자용 이벤트 상세 조회")
+  @GetMapping("/admin/detail")
+  public BaseResponse<EventResponse.AdminEventDetailResponse> getAdminEventDetail(
+      @RequestParam Long eventId,
+      @CurrentMember Member member
+  ) {
+    EventResponse.AdminEventDetailResponse response = eventService.getAdminEventDetail(eventId, member);
+    logResponse(response);
+    return BaseResponse.of(SuccessCode.SUCCESS, response);
+  }
+
+  @Operation(summary = "관리자용 이벤트 정보 수정")
+  @PatchMapping("/admin")
+  public BaseResponse<EventResponse.UpdateEventResponse> updateEventInfo(
+      @Valid @RequestBody EventRequest.UpdateRequest request,
+      @CurrentMember Member member
+  ) {
+    EventResponse.UpdateEventResponse response = eventService.updateEventInfo(request, member);
+    logResponse(response);
+    return BaseResponse.of(SuccessCode.SUCCESS, response);
+  }
+
 }

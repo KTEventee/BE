@@ -69,4 +69,21 @@ public class Event extends BaseEntity {
   public void updateThumbnail(String url) {
     this.thumbnailUrl = url;
   }
+
+  public void updateInfo(String title, String description, LocalDateTime startAt, LocalDateTime endAt) {
+    if (title != null) {
+      this.title = title;
+    }
+    if (description != null) {
+      this.description = description;
+    }
+    if (startAt != null) {
+      this.startAt = startAt;
+    }
+    if (endAt != null) {
+      this.endAt = endAt;
+    }
+  }
+
+
 }

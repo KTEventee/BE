@@ -155,4 +155,36 @@ public class EventResponse {
       @Schema(description = "이벤트 제목") String title,
       @Schema(description = "결과 메시지") String message
   ) {}
+
+  // 7. 관리자 이벤트 상세 조회 응답
+  @Schema(description = "관리자 이벤트 상세 조회 응답 DTO")
+  @Builder
+  public record AdminEventDetailResponse(
+      @Schema(description = "이벤트 ID") Long eventId,
+      @Schema(description = "이벤트 제목") String title,
+      @Schema(description = "이벤트 설명") String description,
+      @Schema(description = "이벤트 시작일") LocalDateTime startAt,
+      @Schema(description = "이벤트 종료일") LocalDateTime endAt,
+      @Schema(description = "초대 코드") String inviteCode,
+      @Schema(description = "참여자 수") Long participantCount,
+      @Schema(description = "그룹 수") Long groupCount
+  ) {}
+
+  // 8. 이벤트 수정 응답 DTO
+  @Schema(description = "이벤트 정보 수정 응답 DTO")
+  @Builder
+  public record UpdateEventResponse(
+      @Schema(description = "이벤트 ID") Long eventId,
+      @Schema(description = "이벤트 제목") String title,
+      @Schema(description = "이벤트 설명") String description,
+      @Schema(description = "시작일") LocalDateTime startAt,
+      @Schema(description = "종료일") LocalDateTime endAt,
+      @Schema(description = "초대 코드") String inviteCode,
+      Long participantCount,
+      Long groupCount
+  ) {}
+
+
+
+
 }
