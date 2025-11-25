@@ -23,8 +23,6 @@ import com.server.eventee.domain.post.repository.PostRepository;
 import java.util.List;
 import java.util.Objects;
 
-import com.server.eventee.global.exception.BaseException;
-import com.server.eventee.global.exception.codes.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -166,11 +164,10 @@ public class EventServiceImpl implements EventService {
 
     List<Post> posts = postRepository.findAllByGroupAndIsDeletedFalse(group);
 
-    // 🔥 투표 옵션/퍼센트/댓글/author 모두 포함한 DTO 변환
     return eventConverter.toGroupPostsResponse(group, posts, member);
   }
 
-  // 🔍 초대 코드 유효성 검증
+  // 초대 코드 유효성 검증
   @Transactional(readOnly = true)
   @Override
   public EventResponse.InviteCodeValidateResponse validateInviteCode(String code) {
@@ -185,7 +182,7 @@ public class EventServiceImpl implements EventService {
     );
   }
 
-  // 🔐 초대 코드 + 패스워드 검증
+  // 초대 코드 + 패스워드 검증
   @Transactional(readOnly = true)
   @Override
   public EventResponse.EventPasswordVerifyResponse verifyEventPassword(EventRequest.PasswordVerifyRequest request) {
@@ -206,7 +203,7 @@ public class EventServiceImpl implements EventService {
   }
 
   @Transactional(readOnly = true)
-  public List<MemberListDto.MemberDto> getMembersByEvent(long eventId){
+  public List<MemberListDto.MemberDto> getMembersByEvent(long eventId, Member member){
     Event event = eventRepository.findByIdAndIsDeletedFalse(eventId).orElseThrow(
             () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
     );
@@ -218,15 +215,15 @@ public class EventServiceImpl implements EventService {
   }
 
   @Transactional
-  public void kickMember(EventRequest.KickMemberRequest request){
-    Member member = memberRepository.findById(request.memberId()).orElseThrow(
+  public void kickMember(EventRequest.KickMemberRequest request, Member member){
+    Member kickMember = memberRepository.findById(request.memberId()).orElseThrow(
             () -> new MemberHandler(MemberErrorStatus.MEMBER_NOT_FOUND)
     );
     Event event = eventRepository.findByIdAndIsDeletedFalse(request.eventId()).orElseThrow(
             () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
     );
 
-    MemberEvent me = memberEventRepository.findByMemberAndEventAndIsDeletedFalse(member,event).orElseThrow(
+    MemberEvent me = memberEventRepository.findByMemberAndEventAndIsDeletedFalse(kickMember,event).orElseThrow(
             () -> new EventHandler(EventErrorStatus.EVENT_MEMBER_NOT_FOUND)
     );
     memberEventRepository.delete(me);

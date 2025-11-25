@@ -19,7 +19,7 @@ public interface EventService {
 
   EventResponse.EventPasswordVerifyResponse verifyEventPassword(EventRequest.PasswordVerifyRequest request);
 
-  List<MemberListDto.MemberDto> getMembersByEvent(long eventId);
-  void kickMember(EventRequest.KickMemberRequest request);
+  List<MemberListDto.MemberDto> getMembersByEvent(long eventId, Member member);
+  void kickMember(EventRequest.KickMemberRequest request, Member member);
 }
 
