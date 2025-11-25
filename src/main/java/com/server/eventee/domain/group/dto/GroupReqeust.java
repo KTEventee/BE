@@ -11,9 +11,7 @@ public class GroupReqeust {
             @Schema(description = "그룹 이름", example = "개발 1팀")
             String groupName,
             @Schema(description = "그룹 설명", example = "백엔드 개발을 담당하는 팀입니다.")
-            String groupDescription,
-            @Schema(description = "그룹 이미지 URL", example = "https://eventee.s3.amazonaws.com/group/dev1.png")
-            String imgUrl
+            String groupDescription
     ) {}
 
     @Schema(description = "그룹 이동 요청 DTO")

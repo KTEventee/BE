@@ -31,30 +31,39 @@ public class GroupServiceImpl implements GroupService{
     private final MemberGroupRepository memberGroupRepository;
 
     @Transactional
-    public void createAdditionalGroup(GroupReqeust.GroupCreateDto request
-            ,Member member
-    ){
+    public void createAdditionalGroup(GroupReqeust.GroupCreateDto request, Member member) {
 
-        Event event = eventRepository.findByIdAndIsDeletedFalse(request.eventId()).orElseThrow(
-                () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
-        );
+        // 1) eventId로 이벤트 찾기
+        Event event = eventRepository.findByIdAndIsDeletedFalse(request.eventId())
+            .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
 
-        int tmpGroupCnt=event.getGroups().size();
-        String leaderName = "test";
+        // 2) 그룹 번호(nextNo) 계산
+        int nextNo = event.getGroups().size() + 1;
 
-        int nextNo = tmpGroupCnt+1;
 
-        Group group = buildGroup(request, leaderName, nextNo);
+        // 3) Group 객체 생성
+        Group group = Group.builder()
+            .event(event)
+            .groupName(request.groupName())
+            .groupDescription(request.groupDescription())
+            .groupImg(null)
+            .groupNo(nextNo)
+            .build();
+
+        // 4) 저장
         Group saved = groupRepository.save(group);
 
+        // 5) 생성자를 해당 그룹의 멤버로 배정
         MemberGroup memberGroup = MemberGroup.builder()
-                .member(member)
-                .group(saved)
-                .build();
+            .member(member)
+            .group(saved)
+            .build();
 
         memberGroupRepository.save(memberGroup);
-        log.info("Group save complete");
+
+        log.info("Group successfully created with eventId = {}", event.getId());
     }
+
 
     @Transactional
     public void updateGroup(GroupReqeust.GroupUpdateDto request){
@@ -137,15 +146,5 @@ public class GroupServiceImpl implements GroupService{
         return groupRepository.findGroupByGroupId(groupUd).orElseThrow(
                 () -> new BaseException(ErrorCode.GROUP_NOT_FOUND)
         );
-    }
-
-    private Group buildGroup(GroupReqeust.GroupCreateDto req, String leaderName, int groupNo) {
-        return Group.builder()
-                .groupName(req.groupName())
-                .groupDescription(req.groupDescription())
-                .groupImg(req.imgUrl())
-                .groupLeader(leaderName)
-                .groupNo(groupNo)
-                .build();
     }
 }

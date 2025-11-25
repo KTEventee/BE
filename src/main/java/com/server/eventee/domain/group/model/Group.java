@@ -31,7 +31,7 @@ public class Group extends BaseEntity {
     @NotNull private String groupDescription;
     private String groupImg;
     @NotNull private int groupNo;
-    @NotNull private String groupLeader;
+    private String groupLeader;
 
     @OneToMany
     private List<Post> posts = new ArrayList<>();
@@ -49,9 +49,9 @@ public class Group extends BaseEntity {
         Long groupId,
         @NotNull String groupName,
         @NotNull String groupDescription,
-        @NotNull String groupImg,
+        String groupImg,
         @NotNull int groupNo,
-        @NotNull String groupLeader,
+        String groupLeader,
         @NotNull Event event
     ) {
         this.groupId = groupId;

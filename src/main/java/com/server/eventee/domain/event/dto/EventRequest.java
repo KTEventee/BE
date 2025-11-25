@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Schema(description = "이벤트 요청 DTO 모음")
@@ -65,9 +66,31 @@ public class EventRequest {
       String password
   ) {}
 
-    public record KickMemberRequest(
-            long eventId,
-            long memberId
-    ){}
+  public record KickMemberRequest(
+      long eventId,
+      long memberId
+  ){}
+
+
+  @Schema(description = "이벤트 수정 요청 DTO")
+  public record UpdateRequest(
+
+      @NotNull
+      @Schema(description = "이벤트 ID")
+      Long eventId,
+
+      @Schema(description = "수정할 제목")
+      String title,
+
+      @Schema(description = "수정할 설명")
+      String description,
+
+      @Schema(description = "이벤트 시작일", example = "2025-03-10")
+      LocalDate startAt,
+
+      @Schema(description = "이벤트 종료일", example = "2025-03-11")
+      LocalDate endAt
+  ) {}
+
 
 }

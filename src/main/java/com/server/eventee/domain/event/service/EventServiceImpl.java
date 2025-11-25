@@ -3,6 +3,8 @@ package com.server.eventee.domain.event.service;
 import com.server.eventee.domain.event.converter.EventConverter;
 import com.server.eventee.domain.event.dto.EventRequest;
 import com.server.eventee.domain.event.dto.EventResponse;
+import com.server.eventee.domain.event.dto.EventResponse.AdminEventDetailResponse;
+import com.server.eventee.domain.event.dto.EventResponse.UpdateEventResponse;
 import com.server.eventee.domain.event.dto.MemberListDto;
 import com.server.eventee.domain.event.excepiton.EventHandler;
 import com.server.eventee.domain.event.excepiton.status.EventErrorStatus;
@@ -19,18 +21,15 @@ import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.member.repository.MemberRepository;
 import com.server.eventee.domain.post.model.Post;
 import com.server.eventee.domain.post.repository.PostRepository;
-
-import java.util.List;
-import java.util.Objects;
-
-import com.server.eventee.global.exception.BaseException;
-import com.server.eventee.global.exception.codes.ErrorCode;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +43,9 @@ public class EventServiceImpl implements EventService {
   private final EventConverter eventConverter;
   private final MemberRepository memberRepository;
 
-  // 이벤트 생성
+  /* ============================================
+      1. 이벤트 생성
+  ============================================ */
   @Transactional
   @Override
   public EventResponse.CreateResponse createEvent(Member member, EventRequest.CreateRequest request) {
@@ -53,10 +54,8 @@ public class EventServiceImpl implements EventService {
       throw new EventHandler(EventErrorStatus.EVENT_TEAM_COUNT_INVALID);
     }
 
-    // 초대 코드 생성
     String inviteCode = RandomStringUtils.randomAlphabetic(6).toUpperCase();
 
-    // 이벤트 엔티티 생성
     Event event = eventConverter.toEvent(
         inviteCode,
         request.title(),
@@ -69,11 +68,11 @@ public class EventServiceImpl implements EventService {
 
     event = eventRepository.save(event);
 
-    // HOST MemberEvent 생성
+    // HOST 연결
     MemberEvent hostRelation = eventConverter.toHostRelation(member, event);
     memberEventRepository.save(hostRelation);
 
-    // 그룹 생성
+    // 팀 자동 생성
     for (int i = 1; i <= request.teamCount(); i++) {
       Group group = eventConverter.toGroup(i, member, event);
       groupRepository.save(group);
@@ -82,7 +81,9 @@ public class EventServiceImpl implements EventService {
     return eventConverter.toCreateResponse(event, member);
   }
 
-  // 이벤트 입장
+  /* ============================================
+      2. 이벤트 입장
+  ============================================ */
   @Transactional
   @Override
   public EventResponse.JoinResponse joinEvent(Member member, EventRequest.JoinRequest request) {
@@ -98,7 +99,6 @@ public class EventServiceImpl implements EventService {
         .findByMemberAndEventAndIsDeletedFalse(member, event)
         .orElse(null);
 
-    // 처음 입장 → PARTICIPANT 등록
     if (memberEvent == null) {
       memberEvent = MemberEvent.builder()
           .member(member)
@@ -107,16 +107,16 @@ public class EventServiceImpl implements EventService {
           .nickname(request.nickname())
           .build();
       memberEventRepository.save(memberEvent);
-    }
-    // 기존 입장 기록 있음 → 닉네임만 업데이트
-    else {
+    } else {
       memberEvent.updateNickname(request.nickname());
     }
 
     return eventConverter.toJoinResponse(event, memberEvent);
   }
 
-  // 이벤트 + 그룹 목록 조회
+  /* ============================================
+      3. 이벤트 + 그룹 목록 조회
+  ============================================ */
   @Transactional(readOnly = true)
   @Override
   public EventResponse.EventWithGroupsResponse getEventGroups(Member member, Long eventId) {
@@ -124,25 +124,18 @@ public class EventServiceImpl implements EventService {
     Event event = eventRepository.findById(eventId)
         .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
 
-    MemberEvent memberEvent = memberEventRepository
+    MemberEvent relation = memberEventRepository
         .findByMemberAndEventAndIsDeletedFalse(member, event)
         .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_ACCESS_DENIED));
 
-    MemberEventRole role = memberEvent.getRole();
-
-    boolean isParticipant =
-        memberEventRepository.existsByMemberAndEventAndIsDeletedFalse(member, event);
-
-    if (!isParticipant) {
-      throw new EventHandler(EventErrorStatus.EVENT_ACCESS_DENIED);
-    }
-
     List<Group> groups = groupRepository.findAllByEventId(eventId);
 
-    return eventConverter.toEventWithGroupsResponse(event, groups, role);
+    return eventConverter.toEventWithGroupsResponse(event, groups, relation.getRole());
   }
 
-  // 그룹별 게시글 + 투표 조회
+  /* ============================================
+      4. 그룹별 포스트 조회
+  ============================================ */
   @Transactional(readOnly = true)
   @Override
   public EventResponse.GroupPostsResponse getGroupPosts(Member member, Long eventId, Long groupId) {
@@ -166,11 +159,12 @@ public class EventServiceImpl implements EventService {
 
     List<Post> posts = postRepository.findAllByGroupAndIsDeletedFalse(group);
 
-    // 🔥 투표 옵션/퍼센트/댓글/author 모두 포함한 DTO 변환
     return eventConverter.toGroupPostsResponse(group, posts, member);
   }
 
-  // 🔍 초대 코드 유효성 검증
+  /* ============================================
+      5. 초대 코드 유효성 검증
+  ============================================ */
   @Transactional(readOnly = true)
   @Override
   public EventResponse.InviteCodeValidateResponse validateInviteCode(String code) {
@@ -185,7 +179,9 @@ public class EventServiceImpl implements EventService {
     );
   }
 
-  // 🔐 초대 코드 + 패스워드 검증
+  /* ============================================
+      6. 비밀번호 검증
+  ============================================ */
   @Transactional(readOnly = true)
   @Override
   public EventResponse.EventPasswordVerifyResponse verifyEventPassword(EventRequest.PasswordVerifyRequest request) {
@@ -205,30 +201,119 @@ public class EventServiceImpl implements EventService {
         .build();
   }
 
+  /* ============================================
+      7. 이벤트 참여자 목록
+  ============================================ */
   @Transactional(readOnly = true)
-  public List<MemberListDto.MemberDto> getMembersByEvent(long eventId){
-    Event event = eventRepository.findByIdAndIsDeletedFalse(eventId).orElseThrow(
-            () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
-    );
-    List<MemberEvent> me = memberEventRepository.findMemberEventsByEventAndIsDeletedFalse(event);
-    List<MemberListDto.MemberDto> members = me.stream()
-            .map(m -> MemberListDto.MemberDto.from(m.getMember()))
-            .toList();
-    return  members;
+  public List<MemberListDto.MemberDto> getMembersByEvent(long eventId, Member member) {
+
+    Event event = eventRepository.findByIdAndIsDeletedFalse(eventId)
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
+
+    List<MemberEvent> relations = memberEventRepository
+        .findMemberEventsByEventAndIsDeletedFalse(event);
+
+    return relations.stream()
+        .map(m -> MemberListDto.MemberDto.from(m.getMember()))
+        .toList();
   }
 
+  /* ============================================
+      8. 강퇴
+  ============================================ */
   @Transactional
-  public void kickMember(EventRequest.KickMemberRequest request){
-    Member member = memberRepository.findById(request.memberId()).orElseThrow(
-            () -> new MemberHandler(MemberErrorStatus.MEMBER_NOT_FOUND)
-    );
-    Event event = eventRepository.findByIdAndIsDeletedFalse(request.eventId()).orElseThrow(
-            () -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND)
-    );
+  public void kickMember(EventRequest.KickMemberRequest request, Member member) {
 
-    MemberEvent me = memberEventRepository.findByMemberAndEventAndIsDeletedFalse(member,event).orElseThrow(
-            () -> new EventHandler(EventErrorStatus.EVENT_MEMBER_NOT_FOUND)
-    );
+    Member kickMember = memberRepository.findById(request.memberId())
+        .orElseThrow(() -> new MemberHandler(MemberErrorStatus.MEMBER_NOT_FOUND));
+
+    Event event = eventRepository.findByIdAndIsDeletedFalse(request.eventId())
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
+
+    MemberEvent me = memberEventRepository.findByMemberAndEventAndIsDeletedFalse(kickMember, event)
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_MEMBER_NOT_FOUND));
+
     memberEventRepository.delete(me);
   }
+
+  /* ============================================
+      9. 이벤트 정보 수정 → 수정된 값 반환
+  ============================================ */
+  @Transactional
+  @Override
+  public UpdateEventResponse updateEventInfo(EventRequest.UpdateRequest request, Member admin) {
+
+    Event event = eventRepository.findById(request.eventId())
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
+
+    MemberEvent relation = memberEventRepository
+        .findByMemberAndEventAndIsDeletedFalse(admin, event)
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_ACCESS_DENIED));
+
+    if (relation.getRole() != MemberEventRole.HOST) {
+      throw new EventHandler(EventErrorStatus.EVENT_ACCESS_DENIED);
+    }
+
+    // LocalDate → LocalDateTime 변환
+    LocalDateTime startDateTime = request.startAt() != null ? request.startAt().atStartOfDay() : null;
+    LocalDateTime endDateTime = request.endAt() != null ? request.endAt().atTime(23, 59, 59) : null;
+
+
+    event.updateInfo(
+        request.title(),
+        request.description(),
+        startDateTime,
+        endDateTime
+    );
+
+    eventRepository.save(event);
+
+    Long participantCount = memberEventRepository.countByEventId(event.getId());
+    Long groupCount = groupRepository.countByEventId(event.getId());
+
+    return UpdateEventResponse.builder()
+        .eventId(event.getId())
+        .title(event.getTitle())
+        .description(event.getDescription())
+        .startAt(event.getStartAt())
+        .endAt(event.getEndAt())
+        .inviteCode(event.getInviteCode())
+        .participantCount(participantCount)
+        .groupCount(groupCount)
+        .build();
+
+  }
+
+  /* ============================================
+      10. 관리자 대시보드 상세 조회
+  ============================================ */
+  @Transactional(readOnly = true)
+  public AdminEventDetailResponse getAdminEventDetail(Long eventId, Member admin) {
+
+    Event event = eventRepository.findById(eventId)
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_NOT_FOUND));
+
+    MemberEvent relation = memberEventRepository
+        .findByMemberAndEventAndIsDeletedFalse(admin, event)
+        .orElseThrow(() -> new EventHandler(EventErrorStatus.EVENT_ACCESS_DENIED));
+
+    if (relation.getRole() != MemberEventRole.HOST) {
+      throw new EventHandler(EventErrorStatus.EVENT_ACCESS_DENIED);
+    }
+
+    Long participantCount = memberEventRepository.countByEventId(eventId);
+    Long groupCount = groupRepository.countByEventId(eventId);
+
+    return AdminEventDetailResponse.builder()
+        .eventId(event.getId())
+        .title(event.getTitle())
+        .description(event.getDescription())
+        .startAt(event.getStartAt())
+        .endAt(event.getEndAt())
+        .inviteCode(event.getInviteCode())
+        .participantCount(participantCount)
+        .groupCount(groupCount)
+        .build();
+  }
 }
+

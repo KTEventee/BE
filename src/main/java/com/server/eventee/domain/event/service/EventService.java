@@ -1,10 +1,13 @@
 package com.server.eventee.domain.event.service;
 
 import com.server.eventee.domain.event.dto.EventRequest;
+import com.server.eventee.domain.event.dto.EventRequest.UpdateRequest;
 import com.server.eventee.domain.event.dto.EventResponse;
+import com.server.eventee.domain.event.dto.EventResponse.UpdateEventResponse;
 import com.server.eventee.domain.event.dto.MemberListDto;
 import com.server.eventee.domain.member.model.Member;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 public interface EventService {
@@ -19,7 +22,11 @@ public interface EventService {
 
   EventResponse.EventPasswordVerifyResponse verifyEventPassword(EventRequest.PasswordVerifyRequest request);
 
-  List<MemberListDto.MemberDto> getMembersByEvent(long eventId);
-  void kickMember(EventRequest.KickMemberRequest request);
+  List<MemberListDto.MemberDto> getMembersByEvent(long eventId, Member member);
+  void kickMember(EventRequest.KickMemberRequest request, Member member);
+
+  EventResponse.UpdateEventResponse updateEventInfo(UpdateRequest request, Member member);
+
+  EventResponse.AdminEventDetailResponse getAdminEventDetail(Long eventId, Member member);
 }
 
