@@ -3,6 +3,7 @@ package com.server.eventee.domain.event.converter;
 import com.server.eventee.domain.event.dto.EventResponse;
 import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.event.model.MemberEvent;
+import com.server.eventee.domain.event.model.MemberEvent.MemberEventRole;
 import com.server.eventee.domain.group.model.Group;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.post.model.Post;
@@ -19,11 +20,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class EventConverter {
 
-  private static final String DEFAULT_EVENT_THUMBNAIL =
-      "https://eventee-bucket.s3.ap-northeast-2.amazonaws.com/event/defaultEventImage.png";
+//  private static final String DEFAULT_EVENT_THUMBNAIL =
+//      "https://eventee-bucket.s3.ap-northeast-2.amazonaws.com/event/defaultEventImage.png";
 
-  private static final String DEFAULT_GROUP_IMAGE =
-      "https://eventee-bucket.s3.ap-northeast-2.amazonaws.com/group/defaultGroupImage.png";
+//  private static final String DEFAULT_GROUP_IMAGE =
+//      "https://eventee-bucket.s3.ap-northeast-2.amazonaws.com/group/defaultGroupImage.png";
 
   public Event toEvent(String inviteCode, String title, String description,
       String password, LocalDateTime startAt, LocalDateTime endAt, Integer teamCount) {
@@ -37,7 +38,7 @@ public class EventConverter {
         .inviteCode(inviteCode)
         .teamCount(teamCount)
         .status("OPEN")
-        .thumbnailUrl(DEFAULT_EVENT_THUMBNAIL)
+        .thumbnailUrl(null)
         .build();
   }
 
@@ -53,8 +54,8 @@ public class EventConverter {
   public Group toGroup(int groupNo, Member leader, Event event) {
     return Group.builder()
         .groupName("팀 " + groupNo + "조")
-        .groupDescription("자동 생성된 그룹입니다.")
-        .groupImg(DEFAULT_GROUP_IMAGE)
+        .groupDescription("팀 이름과 소개를 작성해주세요!")
+        .groupImg(null)
         .groupNo(groupNo)
         .groupLeader(leader.getNickname())
         .event(event)
@@ -62,7 +63,7 @@ public class EventConverter {
   }
 
   public EventResponse.CreateResponse toCreateResponse(Event event, Member member) {
-    String inviteUrl = "https://eventee.site/invite/" + event.getInviteCode();
+    String inviteUrl = "https://www.eventee.cloud/invite/" + event.getInviteCode();
 
     return EventResponse.CreateResponse.builder()
         .eventId(event.getId())
@@ -82,7 +83,7 @@ public class EventConverter {
         .build();
   }
 
-  public EventResponse.EventWithGroupsResponse toEventWithGroupsResponse(Event event, List<Group> groups) {
+  public EventResponse.EventWithGroupsResponse toEventWithGroupsResponse(Event event, List<Group> groups, MemberEventRole role) {
 
     List<EventResponse.EventWithGroupsResponse.GroupSummary> groupDtos =
         groups.stream()
@@ -100,6 +101,7 @@ public class EventConverter {
         .eventId(event.getId())
         .eventTitle(event.getTitle())
         .eventDescription(event.getDescription())
+        .eventRole(role.name())
         .thumbnailUrl(event.getThumbnailUrl())
         .startAt(event.getStartAt())
         .endAt(event.getEndAt())

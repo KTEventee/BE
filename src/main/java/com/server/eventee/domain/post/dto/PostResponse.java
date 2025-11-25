@@ -36,6 +36,7 @@ public class PostResponse {
     ) {
 
         public static PostDto from(Post post, Member member) {
+
             String writer = post.getMember().getNickname();
 
             List<CommentResponse.CommentDto> comments =
@@ -45,12 +46,12 @@ public class PostResponse {
 
             if (post.getPostType() == PostType.VOTE) {
 
+                // 안정적인 옵션 파싱 (공백/쉼표 여러 형태 모두 처리)
                 String[] options = post.getVoteContent() != null
-                    ? post.getVoteContent().split("_")
+                    ? post.getVoteContent().split("\\s*,\\s*")
                     : new String[0];
 
                 List<VoteLog> logs = post.getVoteLogs();
-
                 int totalVotes = logs.size();
 
                 for (int i = 0; i < options.length; i++) {
@@ -66,14 +67,17 @@ public class PostResponse {
                         : 0;
 
                     boolean isMine = logs.stream()
-                        .anyMatch(v -> v.getMember().getId().equals(member.getId())
-                            && v.getVoteNum() == optionNo);
+                        .anyMatch(v ->
+                            v.getMember().getId().equals(member.getId()) &&
+                                v.getVoteNum() == optionNo
+                        );
 
                     voteOptionDtos.add(
                         new VoteOptionDto(optionNo, text, votes, percent, isMine)
                     );
                 }
             }
+
 
             return new PostDto(
                 post.getPostId(),
@@ -86,6 +90,7 @@ public class PostResponse {
                 member.getNickname().equals(writer)
             );
         }
+
 
         public static List<PostDto> from(List<Post> posts, Member member) {
             return posts.stream()

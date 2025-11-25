@@ -29,7 +29,7 @@ public class Group extends BaseEntity {
 
     @NotNull private String groupName;
     @NotNull private String groupDescription;
-    @NotNull private String groupImg;
+    private String groupImg;
     @NotNull private int groupNo;
     @NotNull private String groupLeader;
 
