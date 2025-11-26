@@ -122,4 +122,8 @@ public class Group extends BaseEntity {
 
     }
 
+    public void updateGroupImg(String imgUrl) {
+        this.groupImg = imgUrl;
+    }
+
 }

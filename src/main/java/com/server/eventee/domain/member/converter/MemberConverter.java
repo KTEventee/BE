@@ -14,7 +14,7 @@ public class MemberConverter {
   public MemberMyPageResponse toResponse(Member member, List<Event> joinedEvents) {
 
     List<MemberMyPageResponse.JoinedEvent> joinedEventDtos = joinedEvents.stream()
-        .map(event -> toJoinedEvent(event, member)) // ✅ member 정보도 함께 넘김
+        .map(event -> toJoinedEvent(event, member))
         .toList();
 
     // 안전 처리된 프로필 이미지 URL
