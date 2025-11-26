@@ -13,12 +13,6 @@ import java.util.List;
 public interface MemberService {
 
   String checkAndUpdateNickname(Member member, String nickname);
-
-  String confirmUpload(Member member, ConfirmUploadRequest request);
-
-  DeleteImageResponse deleteProfileImage(Member member);
-
-  PresignedUrlResponse createPresignedUrl(Member member, UploadIntentRequest request);
   MemberMyPageResponse getMyPageInfo(Member member);
 
 }
