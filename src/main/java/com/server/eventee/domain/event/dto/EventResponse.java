@@ -98,10 +98,14 @@ public class EventResponse {
     @Schema(description = "포스트 정보 DTO")
     public record PostInfo(
         @Schema(description = "게시글 ID") Long postId,
-        @Schema(description = "작성자 닉네임") String author,
+        @Schema(description = "작성자 이름") String author,
         @Schema(description = "내용") String content,
         @Schema(description = "포스트 타입 (text / vote)") String type,
         @Schema(description = "작성일") LocalDateTime createdAt,
+
+        @Schema(description = "포스트 작성자 프로필 이미지") String writerProfileUrl,
+        @Schema(description = "포스트 작성자 닉네임") String writerNickname,
+
 
         @Schema(description = "댓글 리스트") List<CommentInfo> comments,
 
