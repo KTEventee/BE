@@ -65,6 +65,7 @@ public class EventResponse {
       @Schema(description = "이벤트 제목") String eventTitle,
       @Schema(description = "이벤트 설명") String eventDescription,
       @Schema(description = "현 사용자의 역할") String eventRole,
+      @Schema(description = "현 사용자의 이벤트용 닉네임") String nickname,
       @Schema(description = "썸네일 URL") String thumbnailUrl,
       @Schema(description = "시작일") LocalDateTime startAt,
       @Schema(description = "종료일") LocalDateTime endAt,

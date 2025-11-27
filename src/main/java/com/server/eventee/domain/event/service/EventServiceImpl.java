@@ -130,7 +130,7 @@ public class EventServiceImpl implements EventService {
 
     List<Group> groups = groupRepository.findAllByEventId(eventId);
 
-    return eventConverter.toEventWithGroupsResponse(event, groups, relation.getRole());
+    return eventConverter.toEventWithGroupsResponse(event, groups, relation.getRole(), relation.getNickname());
   }
 
   /* ============================================
