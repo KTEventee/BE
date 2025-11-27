@@ -4,6 +4,7 @@ import com.server.eventee.domain.event.dto.EventResponse;
 import com.server.eventee.domain.event.model.Event;
 import com.server.eventee.domain.event.model.MemberEvent;
 import com.server.eventee.domain.event.model.MemberEvent.MemberEventRole;
+import com.server.eventee.domain.event.repository.MemberEventRepository;
 import com.server.eventee.domain.group.model.Group;
 import com.server.eventee.domain.member.model.Member;
 import com.server.eventee.domain.post.model.Post;
@@ -15,16 +16,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class EventConverter {
+  private final MemberEventRepository memberEventRepository;
 
-//  private static final String DEFAULT_EVENT_THUMBNAIL =
-//      "https://eventee-bucket.s3.ap-northeast-2.amazonaws.com/event/defaultEventImage.png";
-
-//  private static final String DEFAULT_GROUP_IMAGE =
-//      "https://eventee-bucket.s3.ap-northeast-2.amazonaws.com/group/defaultGroupImage.png";
 
   public Event toEvent(String inviteCode, String title, String description,
       String password, LocalDateTime startAt, LocalDateTime endAt, Integer teamCount) {
@@ -110,11 +109,17 @@ public class EventConverter {
         .build();
   }
 
-  public EventResponse.GroupPostsResponse toGroupPostsResponse(Group group, List<Post> posts, Member member) {
+  public EventResponse.GroupPostsResponse toGroupPostsResponse(
+      Group group,
+      List<Post> posts,
+      Member member
+  ) {
+
+    Long eventId = group.getEvent().getId();
 
     List<EventResponse.GroupPostsResponse.PostInfo> postInfos =
         posts.stream()
-            .map(post -> convertPostToDto(post, member))
+            .map(post -> convertPostToDto(post, member, eventId))
             .toList();
 
     return EventResponse.GroupPostsResponse.builder()
@@ -124,9 +129,23 @@ public class EventConverter {
         .build();
   }
 
-  private EventResponse.GroupPostsResponse.PostInfo convertPostToDto(Post post, Member currentUser) {
+
+  private EventResponse.GroupPostsResponse.PostInfo convertPostToDto(
+      Post post,
+      Member currentUser,
+      Long eventId
+  ) {
 
     boolean isMinePost = post.getMember().getId().equals(currentUser.getId());
+
+    String author = post.getMember().getNickname();
+
+    MemberEvent me = memberEventRepository
+        .findByMemberAndEventAndIsDeletedFalse(post.getMember(), post.getGroup().getEvent())
+        .orElse(null);
+
+    String writerNickname = me != null ? me.getNickname() : null;
+    String writerProfileUrl = post.getMember().getProfileImageUrl();
 
     List<EventResponse.GroupPostsResponse.CommentInfo> comments =
         convertComments(post.getComments(), currentUser);
@@ -182,7 +201,9 @@ public class EventConverter {
 
     return EventResponse.GroupPostsResponse.PostInfo.builder()
         .postId(post.getPostId())
-        .author(post.getMember().getNickname())
+        .author(author)
+        .writerNickname(writerNickname)
+        .writerProfileUrl(writerProfileUrl)
         .content(post.getContent())
         .type(post.getPostType().type.toLowerCase())
         .createdAt(post.getCreatedAt())
@@ -193,6 +214,7 @@ public class EventConverter {
         .isMine(isMinePost)
         .build();
   }
+
 
   private List<EventResponse.GroupPostsResponse.CommentInfo> convertComments(
       List<Comment> comments,
