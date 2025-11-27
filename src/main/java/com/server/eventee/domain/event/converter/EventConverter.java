@@ -82,7 +82,7 @@ public class EventConverter {
         .build();
   }
 
-  public EventResponse.EventWithGroupsResponse toEventWithGroupsResponse(Event event, List<Group> groups, MemberEventRole role) {
+  public EventResponse.EventWithGroupsResponse toEventWithGroupsResponse(Event event, List<Group> groups, MemberEventRole role, String nickname) {
 
     List<EventResponse.EventWithGroupsResponse.GroupSummary> groupDtos =
         groups.stream()
@@ -101,6 +101,7 @@ public class EventConverter {
         .eventTitle(event.getTitle())
         .eventDescription(event.getDescription())
         .eventRole(role.name())
+        .nickname(nickname)
         .thumbnailUrl(event.getThumbnailUrl())
         .startAt(event.getStartAt())
         .endAt(event.getEndAt())
