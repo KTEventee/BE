@@ -62,11 +62,15 @@ dependencies {
 	// actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-
 	//prometheus
 	runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
+	//loki4j
+	implementation 'com.github.loki4j:loki-logback-appender:2.0.0'
+	implementation 'com.github.loki4j:loki-protobuf:0.0.2_pb4.31.0'
+	implementation 'org.apache.httpcomponents:httpclient:4.5.14'
 }
+
 
 tasks.named('test') {
 	useJUnitPlatform()
