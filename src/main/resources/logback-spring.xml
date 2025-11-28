@@ -1,23 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <springProperty scope="context" name="ENV" source="spring.profile.active" />
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name"/>
 
     <variable name="LOKI_URL" value="${LOKI_URL:-http://localhost:3100/loki/api/v1/push}" />
-
     <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
-
         <http>
             <url> ${LOKI_URL} </url>
         </http>
-
         <format>
+
+
             <label>
-                <pattern>level=%level</pattern>
+                <pattern>
+                    app=${APP_NAME},env=${ENV:-prod},level=%level,logger=%logger
+                </pattern>
             </label>
             <message>
-                <pattern>{"level":"%level","msg":"%msg"}</pattern>
+                <pattern>
+                    {
+                        "timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}",
+                        "level":"%level",
+                        "thread":"%thread",
+                        "msg":"%msg"
+                    }
+                </pattern>
             </message>
-        </format>
 
+
+
+        </format>
     </appender>
 
     <root level="INFO">
