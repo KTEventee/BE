@@ -222,16 +222,33 @@ public class EventConverter {
       Member currentUser
   ) {
     return comments.stream()
-        .map(c -> EventResponse.GroupPostsResponse.CommentInfo.builder()
-            .commentId(c.getCommentId())
-            .content(c.getContent())
-            .writerNickname(c.getMember().getNickname())
-            .writerProfileUrl(c.getMember().getProfileImageUrl())
-            .createdAt(c.getCreatedAt())
-            .isMine(c.getMember().getId().equals(currentUser.getId()))
-            .build())
+        .map(c -> {
+          Member commenter = c.getMember();
+
+          // 댓글 작성자의 이벤트 내 닉네임 조회
+          MemberEvent me = memberEventRepository
+              .findByMemberAndEventAndIsDeletedFalse(
+                  commenter,
+                  c.getPost().getGroup().getEvent()
+              )
+              .orElse(null);
+
+          String writerNickname = (me != null)
+              ? me.getNickname()            // 이벤트 닉네임
+              : commenter.getNickname();    // fallback: 전역 닉네임
+
+          return EventResponse.GroupPostsResponse.CommentInfo.builder()
+              .commentId(c.getCommentId())
+              .content(c.getContent())
+              .writerNickname(writerNickname)
+              .writerProfileUrl(commenter.getProfileImageUrl())
+              .createdAt(c.getCreatedAt())
+              .isMine(c.getMember().getId().equals(currentUser.getId()))
+              .build();
+        })
         .toList();
   }
+
 
   public EventResponse.JoinResponse toJoinResponse(Event event, MemberEvent memberEvent) {
 
