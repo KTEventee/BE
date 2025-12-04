@@ -243,7 +243,7 @@ public class EventConverter {
               .writerNickname(writerNickname)
               .writerProfileUrl(commenter.getProfileImageUrl())
               .createdAt(c.getCreatedAt())
-              .isMine(commenter.getId().equals(currentUser.getId()))
+              .isMine(c.getMember().getId().equals(currentUser.getId()))
               .build();
         })
         .toList();
